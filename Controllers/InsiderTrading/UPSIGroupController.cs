@@ -1054,31 +1054,22 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     {
                         HttpPostedFile file = files[i];
                         String ext = Path.GetExtension(file.FileName);
-                        String name = Path.GetFileNameWithoutExtension(file.FileName);
+                        string sNm = Path.GetFileNameWithoutExtension(file.FileName);
+                        String name = "UPSICommunication_";
                         string fname;
-                        if (HttpContext.Current.Request.Browser.Browser.ToUpper() == "IE" || HttpContext.Current.Request.Browser.Browser.ToUpper() == "INTERNETEXPLORER")
+
+                        if (sNm.Contains("%00"))
                         {
-                            string[] testfiles = file.FileName.Split(new char[] { '\\' });
-                            fname = testfiles[testfiles.Length - 1] + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs1 = fname;
+                            UPSIGroupResponse objResponseX = new UPSIGroupResponse();
+                            objResponseX.StatusFl = false;
+                            objResponseX.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                            return objResponseX;
                         }
-                        else
+                        if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
                         {
                             fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs1 = fname;
-                        }
-
-                        if (i == 0)
-                        {
                             sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UPSI/"), fname);
                             file.SaveAs(sSaveAs);
-                            //rel.fileName = fname;
-                        }
-                        else
-                        {
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UPSI/"), fname);
-                            file.SaveAs(sSaveAs);
-                            //rel.fileNameESOP = fname;
                         }
                     }
                     if (!String.IsNullOrEmpty(sSaveAs))
