@@ -1,15 +1,22 @@
 using ProcsDLL.Models.Infrastructure;
+using ProcsDLL.Models.Login.Modal;
+using ProcsDLL.Models.Login.Service.Request;
+using ProcsDLL.Models.Login.Service.Response;
 using Saml;
 using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Runtime.InteropServices;
+using System.Web;
+
 namespace ProcsDLL
 {
     public partial class ValidateUser : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            HttpBrowserCapabilities bc = Request.Browser;//nc
             if (Request.HttpMethod.ToUpper() == "POST")
             {
                 string samlCer = ConfigurationManager.AppSettings["CertKey"];
@@ -56,15 +63,52 @@ namespace ProcsDLL
                             Session["AdminDb"] = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["AdminDB"]), true);
                             Session["AuthToken"] = Guid.NewGuid().ToString();
                             Response.Cookies["AuthToken"].Value = Session["AuthToken"].ToString();
-
-                            string sModule = Convert.ToString(ConfigurationManager.AppSettings["Module"]);
-                            if (sModule.ToUpper() == "UPSI")
+                            //================nc session=============
+                            if (HttpContext.Current.Request.UserAgent.Contains("Edg"))
                             {
-                                Response.Redirect(Session["ModuleFolder"] + "/" + "DashboardUpsi.aspx", false);
+                                Session["Browser"] = "Microsoft Edge";
                             }
                             else
                             {
-                                Response.Redirect(Session["ModuleFolder"] + "/" + "PITDashboard.aspx", false);
+                                Session["Browser"] = bc.Browser;//nc
+                            }
+
+                            Session["MacId"] = GetClientMAC(GetIPAddress());//nc
+                            Session["IP"] = GetIPAddress();//nc
+
+                            SessionDTO sDTO = new SessionDTO();
+                            sDTO.EMP_ID = Convert.ToString(email);
+                            sDTO.MAC_ID = GetClientMAC(GetIPAddress());
+                            sDTO.IP = GetIPAddress().ToString();
+                            if (HttpContext.Current.Request.UserAgent.Contains("Edg"))
+                            {
+                                sDTO.BROWSER = "Microsoft Edge";
+                            }
+                            else
+                            {
+                                sDTO.BROWSER = bc.Browser;
+                            }
+
+
+                            SessionRequest sReq = new SessionRequest(sDTO);
+                            SessionResponse sRes = sReq.SaveSession();
+
+                            if (sRes.StatusFl == true)
+                            {
+                                string sModule = Convert.ToString(ConfigurationManager.AppSettings["Module"]);
+                                if (sModule.ToUpper() == "UPSI")
+                                {
+                                    Response.Redirect(Session["ModuleFolder"] + "/" + "DashboardUpsi.aspx", false);
+                                }
+                                else
+                                {
+                                    Response.Redirect(Session["ModuleFolder"] + "/" + "PITDashboard.aspx", false);
+                                } 
+                            }
+                            else if (sRes.StatusFl == false && sRes.Msg == "Sorry You have already logged in with another Browser or Another System")
+                            {
+                                ClientScript.RegisterClientScriptBlock(this.GetType(), "alert", "<script type = 'text/javascript'>window.onload=function(){alert('Sorry You have already logged in with another Browser or Another System')};</script>");
+                                 
                             }
                         }
                         else
@@ -89,6 +133,65 @@ namespace ProcsDLL
                     }
                 }
             }
+        }
+        public static string GetIPAddress()
+        {
+            System.Web.HttpContext context = System.Web.HttpContext.Current;
+            string ipAddress = context.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+            if (!string.IsNullOrEmpty(ipAddress))
+            {
+                string[] addresses = ipAddress.Split(',');
+                if (addresses.Length != 0)
+                {
+                    return addresses[0];
+                }
+            }
+
+            return context.Request.ServerVariables["REMOTE_ADDR"];
+        }
+        [DllImport("Iphlpapi.dll")]
+        private static extern int SendARP(Int32 dest, Int32 host, ref Int64 mac, ref Int32 length);
+        [DllImport("Ws2_32.dll")]
+        private static extern Int32 inet_addr(string ip);
+
+        private static string GetClientMAC(string strClientIP)
+        {
+            string mac_dest = "";
+            try
+            {
+                Int32 ldest = inet_addr(strClientIP);
+                Int32 lhost = inet_addr("");
+                Int64 macinfo = new Int64();
+                Int32 len = 6;
+                int res = SendARP(ldest, 0, ref macinfo, ref len);
+                string mac_src = macinfo.ToString("X");
+
+                while (mac_src.Length < 12)
+                {
+                    mac_src = mac_src.Insert(0, "0");
+                }
+
+                for (int i = 0; i < 11; i++)
+                {
+                    if (0 == (i % 2))
+                    {
+                        if (i == 10)
+                        {
+                            mac_dest = mac_dest.Insert(0, mac_src.Substring(i, 2));
+                        }
+                        else
+                        {
+                            mac_dest = "-" + mac_dest.Insert(0, mac_src.Substring(i, 2));
+                        }
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                throw new Exception("L?i " + err.Message);
+            }
+            return mac_dest;
         }
     }
 }

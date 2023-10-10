@@ -940,6 +940,54 @@ namespace ProcsDLL.Models.InsiderTrading.Repository
                 return objReportsResponse;
             }
         }
+
+        //===============pending tsk rpt by skm=========
+        public ReportsResponse GetPendingTaskReport(Email objLogsReport)
+        {
+            try
+            {
+                SqlParameter[] parameters = new SqlParameter[6];
+                //parameters[0] = new SqlParameter("@COMPANY_ID", objLogsReport.companyId);
+                parameters[0] = new SqlParameter("@SET_COUNT", SqlDbType.Int);
+                parameters[0].Direction = ParameterDirection.Output;
+                parameters[1] = new SqlParameter("@MODE", "GET_PENDING_TASK_REPORT");
+                parameters[2] = new SqlParameter("@TRADE_FROM", FormatHelper.ConvertDate(objLogsReport.mailFrom));
+                parameters[3] = new SqlParameter("@TRADE_TO", FormatHelper.ConvertDate(objLogsReport.mailTo));
+                //parameters[5] = new SqlParameter("@TASK_FOR", objLogsReport.TaskFor);
+                List<Email> lstPendingTaskReport = new List<Email>();
+                DataSet ds = SQLHelper.ExecuteDataset(SQLHelper.GetConnString(), CommandType.StoredProcedure, "SP_PROCS_INSIDER_REPORTS", objLogsReport.MODULE_DATABASE, parameters);
+                if (ds.Tables.Count > 0)
+                {
+                    foreach (DataRow dr1 in ds.Tables[0].Rows)
+                    {
+                        Email LogsReport = new Email();
+                        //LogsReport.TaskFor = Convert.ToInt32(dr1["TASK_ID"]);
+                        LogsReport.TaskFor = !String.IsNullOrEmpty(Convert.ToString(dr1["TASK_FOR"])) ? Convert.ToString(dr1["TASK_FOR"]) : String.Empty;
+                        LogsReport.UserEmail = !String.IsNullOrEmpty(Convert.ToString(dr1["USER_EMAIL"])) ? Convert.ToString(dr1["USER_EMAIL"]) : String.Empty;
+                        LogsReport.mailFrom = !String.IsNullOrEmpty(Convert.ToString(dr1["EMAIL_FROM"])) ? Convert.ToString(dr1["EMAIL_FROM"]) : String.Empty;
+                        LogsReport.mailTo = !String.IsNullOrEmpty(Convert.ToString(dr1["EMAIL_TO"])) ? Convert.ToString(dr1["EMAIL_TO"]) : String.Empty;
+                        LogsReport.EmailDate = !String.IsNullOrEmpty(Convert.ToString(dr1["EMAIL_DATE"])) ? Convert.ToString(dr1["EMAIL_DATE"]) : String.Empty;
+                        LogsReport.subject = !String.IsNullOrEmpty(Convert.ToString(dr1["MSG_SUBJECT"])) ? Convert.ToString(dr1["MSG_SUBJECT"]) : String.Empty;
+                        LogsReport.CreatedOn = !String.IsNullOrEmpty(Convert.ToString(dr1["CREATED_ON"])) ? Convert.ToString(dr1["CREATED_ON"]) : String.Empty;
+                        //LogsReport.DesignationName = !String.IsNullOrEmpty(Convert.ToString(dr1["DESIGNATION_NAME"])) ? Convert.ToString(dr1["DESIGNATION_NAME"]) : String.Empty;
+                        lstPendingTaskReport.Add(LogsReport);
+                    }
+                }
+                ReportsResponse objReportsResponse = new ReportsResponse();
+                objReportsResponse.lstPendingTaskReport = lstPendingTaskReport;
+                objReportsResponse.StatusFl = true;
+                objReportsResponse.Msg = "Reports has been fetched successfully !";
+                return objReportsResponse;
+            }
+            catch (Exception ex)
+            {
+                ReportsResponse objReportsResponse = new ReportsResponse();
+                objReportsResponse.StatusFl = false;
+                objReportsResponse.Msg = "Processing failed due to system error !";
+                return objReportsResponse;
+            }
+        }
+        //============================
         public ReportsResponse GetNonComplianceReport(TradingReport objTradingReport)
         {
 
