@@ -1,5 +1,6 @@
 ﻿var ReminderListing = null;
 var userEmailsSelected = [];
+
 $(document).ready(function () {
     $('#Loader').hide();
     fnBindUserList();
@@ -70,7 +71,6 @@ function fnSendReminderEmail() {
     }
 }
 function val() {
-    debugger;
     if ($('#bindTYPE').val() == "0" || $('#bindTYPE').val() == null || $('#bindTYPE').val() == undefined) {
         alert("Please Select Reminder Type");
         return false;
@@ -117,42 +117,73 @@ function details() {
         tempUserSelected = userEmailsSelected;
     }
 
-    var user = tempUserSelected; //loginid
-    $("#Loader").show();
-    var webUrl = uri + "/api/Reminder/SendReminder";
-    $.ajax({
-        type: 'POST',
-        url: webUrl,
-        data: JSON.stringify({
-            mailType: Type, subject: Sub, lstUser: user, mailBody: text
-        }),
-        contentType: "application/json; charset=utf-8",
-        datatype: "json",
-        // async: true,
-        success: function (msg) {
-            $("#Loader").hide();
-            if (isJson(msg)) {
-                msg = JSON.parse(msg);
-            }
-            if (msg.StatusFl == false) {
+    /*Added by jitendra*/
+    debugger;
+    var user = tempUserSelected; //loginid  
+    $("input[id*=hdnEmailSubject]").val(Sub);
+    $("input[id*=hdnUsers]").val(user);       
+    $("input[id*=hdnMailType]").val(Type);
+    $("input[id*=hdnMailBody]").val(text);
 
-                if (msg.Msg == "SessionExpired") {
-                    alert("Your session is expired. Please login again to continue");
-                    window.location.href = "../LogOut.aspx";
-                }
-                else {
-                    alert(msg.Msg);
-                }
+}
+
+var downloadComplete = false;
+var intervalListener;
+
+var start = $("input[id*=hdnEmailTask]").val();
+if (start == "Start") {
+    $("#LoaderProgerss").show();
+    intervalListener = window.setInterval(function () {
+        if (!downloadComplete) {
+            CallCheckEmailStatus();
+        }
+    }, 2000);
+}
+
+function fnChkStatus() {
+    var start = $("input[id*=hdnEmailTask]").val();
+    if (start == "Start") {
+        $("#LoaderProgerss").show();
+        intervalListener = window.setInterval(function () {
+            if (!downloadComplete) {
+                CallCheckEmailStatus();
             }
-            else {
-                alert(msg.Msg);
-                window.location.reload(true);
+        }, 2000);
+    }
+}
+function CallCheckEmailStatus() {
+    $.ajax({
+        type: "POST",
+        url: "Reminder_Master.aspx/CheckDownload",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (r) {
+            updateStatus('completed', r.d);
+            if (r.d.indexOf('All emails sent') > -1) {
+                downloadComplete = true;
             }
         },
-        error: function (error) {
-            $("#Loader").hide();
-            alert(error.status + ' ' + error.statusText);
-            $('#btnsend_reminders').removeAttr("data-dismiss");
+        error: function (r) {
+            console.log('Check error : ' + r);
+        },
+        failure: function (r) {
+            console.log('Check failure : ' + r);
         }
-    })
+    });
+    if (downloadComplete) {
+        window.clearInterval(intervalListener);
+        $("input[id*=hdnEmailTask]").val('');
+        $("#LoaderProgerss").hide();
+    }
 }
+function updateStatus(status, msg) {
+    document.getElementById('lblMsg').innerHTML = msg;
+    if (msg.indexOf('All emails sent') > -1) {
+        downloadComplete = true;
+        window.clearInterval(intervalListener);
+        $("input[id*=hdnEmailTask]").val('');
+        $("#LoaderProgerss").hide();
+        alert("Reminder Email sent successfully");
+    }
+}
+
