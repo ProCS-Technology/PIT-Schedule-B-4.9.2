@@ -76,7 +76,8 @@ function fnGetAllEsopHdr() {
                     str += '<td>' + msg.BenposHeaderList[index].restrictedCompany.companyName + '</td>';
                     str += '<td>' + msg.BenposHeaderList[index].asOfDate + '</td>';
                     //str += '<td style="display:none">' + msg.BenposHeaderList[index].fileName + '</td>';
-                    str += '<td><a class="fa fa-download" target="_blank" href="Benpos/' + msg.BenposHeaderList[index].fileName + '"></a></td>';
+                    //str += '<td><a class="fa fa-download" target="_blank" href="Benpos/' + msg.BenposHeaderList[index].fileName + '"></a></td>';
+                    str += '<td><a class="fa fa-download" onclick=\'javascript:fnDownloadBenpos("' + msg.BenposHeaderList[index].id + '");\'></a></td>';
                     str += '</tr>';
                 }
 
@@ -92,6 +93,34 @@ function fnGetAllEsopHdr() {
         }
     })
 }
+
+//==========hide download link by skm=================
+function fnDownloadBenpos(EsopId) {
+    var webUrl = uri + "/api/Benpos/GetEsopFile?EsopId=" + EsopId;
+    $.ajax({
+        url: webUrl,
+        type: 'GET',
+        headers: {
+            Accept: "application/vnd.ms-excel; base64",
+        },
+        success: function (data) {
+            debugger;
+            var uri = 'data:application/vnd.ms-excel;base64,' + data;
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = "ExcelReport.xlsx";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function () {
+            console.log('error Occured while Downloading CSV file.');
+        },
+    });
+}
+//============================
+
 function fnSubmitEsopFile() {
     if (fnValidateEsopHdr()) {
         fnSaveThresholdLimitAndByTime();
