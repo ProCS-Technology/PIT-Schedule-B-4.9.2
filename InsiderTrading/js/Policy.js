@@ -66,13 +66,16 @@ function fnGetAllPolicyDocuments() {
                 }
             }
             else {
+                debugger;
                 var str = '';
                 for (index = 0; index < msg.PolicyList.length; index++) {
                     str += '<tr>';
                     str += '<td>' + FormatDate(msg.PolicyList[index].CREATED_DATE, $("input[id*=hdnDateFormat]").val()) + '</td>';
                     str += '<td>' + msg.PolicyList[index].CREATED_BY + '</td>';
-                    str += '<td>' + msg.PolicyList[index].DOCUMENT + '</td>';
-                    str += '<td><a class="fa fa-download" target="_blank" href="../assets/logos/Policy/' + msg.PolicyList[index].DOCUMENT + '"></a></td>';
+                    str += '<td>' + msg.PolicyList[index].DOCUMENT + '</td>'; 
+                    /*str += '<td>' + msg.PolicyList[index].POLICY_ID + '</td>';*/
+                    /*str += '<td><a class="fa fa-download" target="_blank" href="../assets/logos/Policy/' + msg.PolicyList[index].DOCUMENT + '"></a></td>';*/
+                    str += '<td><a class="fa fa-download" onclick=\'javascript:fnDownloadPolicy("' + msg.PolicyList[index].POLICY_ID + '");\'></a></td>';
                     str += '</tr>';
                 }
                 $("#tbdPolicyDocumentList").html(str);
@@ -147,4 +150,30 @@ function fnValidate() {
 function ConvertToDateTime(dateTime) {
     var date = dateTime.split(" ")[0];
     return (date.split("/")[1] + "/" + date.split("/")[0] + "/" + date.split("/")[2]);
+}
+
+function fnDownloadPolicy(POLICY_ID) {
+    debugger;
+    var webUrl = uri + "/api/Policy/GetPolicyFile?POLICY_ID=" + POLICY_ID;
+    $.ajax({
+        url: webUrl,
+        type: 'GET',
+        headers: {
+            Accept: "application/pdf; base64",
+        },
+        success: function (data) {
+            debugger;
+            var uri = 'data:application/pdf;base64,' + data;
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = "ExcelReport.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function () {
+            console.log('error Occured while Downloading CSV file.');
+        },
+    });
 }

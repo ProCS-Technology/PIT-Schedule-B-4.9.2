@@ -9,6 +9,13 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Script.Serialization;
 using System.Configuration;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net;
+using System.Data.SqlClient;
+using ProcsDLL.Models.Infrastructure;
+using System.Data;
+
 namespace ProcsDLL.Controllers.InsiderTrading
 {
     [RoutePrefix("api/Policy")]
@@ -233,6 +240,52 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objResponse.StatusFl = false;
                 objResponse.Msg = ex.Message;
                 return objResponse;
+            }
+        }
+        //Added by Jiten
+        [Route("GetPolicyFile")]
+        [HttpGet]
+        [SwaggerOperation(Tags = new[] { "Policy APIs" })]
+        public HttpResponseMessage GetPolicyFile(string POLICY_ID)
+        {
+            string sConStr = CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ConnectionStringIT"], true);
+            string filenameX = "";
+            using (SqlConnection sCon = new SqlConnection(sConStr))
+            {
+                sCon.Open();
+                string sqlQuery = "SELECT ID,DOCUMENT FROM PROCS_INSIDER_POLICY_MSTR_ARCHIVE WHERE ID=@POLICY_ID";
+                SqlCommand cmd = new SqlCommand(sqlQuery, sCon);
+                cmd.Parameters.AddWithValue("@POLICY_ID", POLICY_ID);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                sCon.Close();
+                if (dt.Rows.Count > 0)
+                {
+                    filenameX = dt.Rows[0]["DOCUMENT"].ToString();
+                }
+                string basePath = "~/assets/logos/Policy/"; // Base path to the directory
+
+                string filePath1 = HttpContext.Current.Server.MapPath(basePath + filenameX);
+                string filePath = HttpContext.Current.Server.MapPath("~/assets/logos/Policy/" + filenameX);
+
+                byte[] fileBook = File.ReadAllBytes(filePath);
+                MemoryStream stream = new MemoryStream();
+                string excelBase64String = Convert.ToBase64String(fileBook);
+                StreamWriter excelWriter = new StreamWriter(stream);
+                excelWriter.Write(excelBase64String);
+                excelWriter.Flush();
+                stream.Position = 0;
+                HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+                httpResponseMessage.Content = new StreamContent(stream);
+                httpResponseMessage.Content.Headers.Add("x-filename", "ExcelReport.pdf");
+                httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+                httpResponseMessage.Content.Headers.ContentDisposition =
+                    new ContentDispositionHeaderValue("attachment");
+                httpResponseMessage.Content.Headers.ContentDisposition.FileName = "ExcelReport.pdf";
+                httpResponseMessage.StatusCode = HttpStatusCode.OK;
+                return httpResponseMessage;
+
             }
         }
     }
