@@ -5990,9 +5990,7 @@
     <Content Include="images\square-minus.svg" />
     <Content Include="images\square.svg" />
     <Content Include="InsiderTrading\AdminManual.aspx" />
-    <Content Include="InsiderTrading\js\PendingTaskReport.js" />
     <Content Include="InsiderTrading\LongTask.aspx" />
-    <Content Include="InsiderTrading\PendingTaskReport.aspx" />
     <Content Include="XSSError.htm" />
     <None Include="InsiderTrading\AnnualDisclosureTask.1aspx" />
     <Content Include="InsiderTrading\AnnualDisclosureTask.aspx" />
@@ -7679,13 +7677,6 @@
     <Compile Include="InsiderTrading\Office365Token.aspx.designer.cs">
       <DependentUpon>Office365Token.aspx</DependentUpon>
     </Compile>
-    <Compile Include="InsiderTrading\PendingTaskReport.aspx.cs">
-      <DependentUpon>PendingTaskReport.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="InsiderTrading\PendingTaskReport.aspx.designer.cs">
-      <DependentUpon>PendingTaskReport.aspx</DependentUpon>
-    </Compile>
     <Compile Include="InsiderTrading\Physical_Share_Master.aspx.cs">
       <DependentUpon>Physical_Share_Master.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -8428,16 +8419,11 @@
     <Compile Include="Models\InsiderTrading\Service\Response\UserResponse .cs" />
     <Compile Include="Models\Login\Modal\BaseEntity.cs" />
     <Compile Include="Models\Login\Modal\Login.cs" />
-    <Compile Include="Models\Login\Modal\Session.cs" />
-    <Compile Include="Models\Login\Modal\SessionDTO.cs" />
     <Compile Include="Models\Login\Modal\UserAccess.cs" />
     <Compile Include="Models\Login\Repository\LoginRepository.cs" />
-    <Compile Include="Models\Login\Repository\SessionRepository.cs" />
     <Compile Include="Models\Login\Service\Request\LoginRequest.cs" />
-    <Compile Include="Models\Login\Service\Request\SessionRequest.cs" />
     <Compile Include="Models\Login\Service\Response\BaseResponse.cs" />
     <Compile Include="Models\Login\Service\Response\LoginResponse.cs" />
-    <Compile Include="Models\Login\Service\Response\SessionResponse.cs" />
     <Compile Include="Models\Menu\Modal\BaseEntity.cs" />
     <Compile Include="Models\Menu\Modal\Menu.cs" />
     <Compile Include="Models\Menu\Modal\MenuItems.cs" />

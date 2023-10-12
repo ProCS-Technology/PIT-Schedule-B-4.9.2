@@ -14,12 +14,6 @@ namespace ProcsDLL.Models.InsiderTrading.Model
         public String body { get; set; }
         public List<String> listAttachment { get; set; }
 
-        public string TaskFor { get; set; }
-        
-        public string EmailDate { get; set; }
-        public string UserEmail { get; set; }
-        public string CreatedOn { get; set; }
-
         public override void Validate()
         {
             base.Validate();

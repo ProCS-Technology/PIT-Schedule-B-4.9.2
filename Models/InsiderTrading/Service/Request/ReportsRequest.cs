@@ -17,7 +17,6 @@ namespace ProcsDLL.Models.InsiderTrading.Service.Request
         private UPSICommunication _UPSICommunication;
         private LogsReport _LogsReport;
         private User _ObjReport;
-        private Email _ObjPendingTaskReport;
         public ReportsRequest()
         {
 
@@ -46,11 +45,6 @@ namespace ProcsDLL.Models.InsiderTrading.Service.Request
         {
             _UPSICommunication = new UPSICommunication();
             _UPSICommunication = uPSICommunication;
-        }
-        public ReportsRequest(Email eEMAIL)
-        {
-            _ObjPendingTaskReport = new Email();
-            _ObjPendingTaskReport = eEMAIL;
         }
         #region "Get Declaration Report"
         public ReportsResponse GetDeclarationReports()
@@ -382,23 +376,5 @@ namespace ProcsDLL.Models.InsiderTrading.Service.Request
                 return objReportsResponse;
             }
         }
-
-        //============pending tsk rpt by skm==============
-        public ReportsResponse GetPendingTaskReport()
-        {
-            try
-            {
-                ReportsRepository oRepository = new ReportsRepository();
-                return oRepository.GetPendingTaskReport(_ObjPendingTaskReport);
-            }
-            catch (Exception ex)
-            {
-                ReportsResponse objReportsResponse = new ReportsResponse();
-                objReportsResponse.StatusFl = false;
-                objReportsResponse.Msg = "Processing failed due to system error !";
-                return objReportsResponse;
-            }
-        }
-        //==========================
     }
 }

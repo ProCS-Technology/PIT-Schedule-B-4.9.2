@@ -14,14 +14,10 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Saml;
-using System.Web.Services;
-using System.Runtime.InteropServices;
-
 namespace ProcsDLL
 {
     public partial class Login : System.Web.UI.Page
     {
-        public static string chkUserType { get; set; }
         Random random = new Random();
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -32,26 +28,13 @@ namespace ProcsDLL
                 Response.Cache.SetCacheability(HttpCacheability.NoCache);
 
                 GenerateSamlURL();
-                if (Convert.ToString(ConfigurationManager.AppSettings["SSOType"]) == "Cloud" &&
-                    Convert.ToString(ConfigurationManager.AppSettings["AuthenticationType"])!= "Hybrid")
-                {
-                    Response.Redirect(GenerateSamlURL());
-                }
-
             }
             UserName.Focus();
             string captcha = Convert.ToString(ConfigurationManager.AppSettings["EnableCaptcha"]);
             enableCaptcha.Value = captcha;
-            enableADLogin.Value = Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["EnableADLogin"], true)); 
-            hdnChkAuthType.Value = Convert.ToString(ConfigurationManager.AppSettings["AuthenticationType"]);
-            hdnChkSSOType.Value = Convert.ToString(ConfigurationManager.AppSettings["SSOType"]);
-            //if (Convert.ToString(ConfigurationManager.AppSettings["SSOType"]) == "Cloud")
-            //{
-            //    GenerateSamlURL();
-            //}
-            //Response.Redirect("https://www.example.com/destinationpage.aspx");
+            enableADLogin.Value = Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["EnableADLogin"], true));
         }
-        private string GenerateSamlURL()
+        private void GenerateSamlURL()
         {
             var samlEndpoint = ConfigurationManager.AppSettings["SAMLUrl"];
             var entityId = ConfigurationManager.AppSettings["EntityId"];
@@ -59,7 +42,6 @@ namespace ProcsDLL
             var request = new AuthRequest(entityId, redirectUri);
             string sUrl = request.GetRedirectUrl(samlEndpoint);
             HiddenADFSUrl.Value = sUrl;
-            return sUrl;
         }
         protected void ResetPassword(object sender, EventArgs e)
         {
@@ -137,16 +119,10 @@ namespace ProcsDLL
         {
             try
             {
-                HttpBrowserCapabilities bc = Request.Browser;//nc
-                //string enableADLogin = Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["EnableADLogin"], true));
-                //if (Convert.ToBoolean(enableADLogin) == true)
-                string chkAuthenticationType = Convert.ToString(ConfigurationManager.AppSettings["AuthenticationType"]);
-                if(chkAuthenticationType== "AD/SSO" || chkAuthenticationType == "Hybrid")
+                string enableADLogin = Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["EnableADLogin"], true));
+                if (Convert.ToBoolean(enableADLogin) == true)
                 {
-                    //if (authenticationType.Value == "Yes")
-                    //if (authenticationType.Value == "Yes")
-                    string SSOType = Convert.ToString(ConfigurationManager.AppSettings["SSOType"]);
-                    if(SSOType== "LocalAD" && chkUserType != "Application")
+                    if (authenticationType.Value == "Yes")
                     {
                         Session["authenticationType"] = "AD";
                         bool IsUserExist = false;
@@ -182,99 +158,60 @@ namespace ProcsDLL
                                         Response.Cache.SetCacheability(HttpCacheability.NoCache);
                                         Session["EmployeeId"] = Convert.ToString(login.LoginId);
                                         Session["AdminDb"] = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["AdminDB"]), true);
-                                        //====================nc for session====================
-                                        if (HttpContext.Current.Request.UserAgent.Contains("Edg"))
-                                        {
-                                            Session["Browser"] = "Microsoft Edge";
-                                        }
-                                        else
-                                        {
-                                            Session["Browser"] = bc.Browser;//nc
-                                        }
 
-                                        Session["MacId"] = GetClientMAC(GetIPAddress());//nc
-                                        Session["IP"] = GetIPAddress();//nc
-                                        Response.Cookies["AuthToken"].Value = Session["AuthToken"].ToString();
-
-                                        SessionDTO sDTO = new SessionDTO();
-                                        sDTO.EMP_ID = Convert.ToString(login.LoginId);
-                                        sDTO.MAC_ID = GetClientMAC(GetIPAddress());
-                                        sDTO.IP = GetIPAddress().ToString();
-                                        if (HttpContext.Current.Request.UserAgent.Contains("Edg"))
+                                        StringBuilder sb = new StringBuilder();
+                                        HashSet<Int32> companyIds = new HashSet<Int32>();
+                                        foreach (UserAccess usr in objResponse.User.UAccess)
                                         {
-                                            sDTO.BROWSER = "Microsoft Edge";
+                                            companyIds.Add(usr.CompanyId);
                                         }
-                                        else
+                                        foreach (Int32 companyId in companyIds)
                                         {
-                                            sDTO.BROWSER = bc.Browser;
-                                        }
-
-
-                                        SessionRequest sReq = new SessionRequest(sDTO);
-                                        SessionResponse sRes = sReq.SaveSession();
-                                        //=========================================
-                                        if (sRes.StatusFl == true)
-                                        {
-                                            StringBuilder sb = new StringBuilder();
-                                            HashSet<Int32> companyIds = new HashSet<Int32>();
-                                            foreach (UserAccess usr in objResponse.User.UAccess)
+                                            var matchedObj = objResponse.User.UAccess.Where(p => p.CompanyId == companyId).ToList();
+                                            if (companyIds.Count == 1 && matchedObj.Count == 1)
                                             {
-                                                companyIds.Add(usr.CompanyId);
-                                            }
-                                            foreach (Int32 companyId in companyIds)
-                                            {
-                                                var matchedObj = objResponse.User.UAccess.Where(p => p.CompanyId == companyId).ToList();
-                                                if (companyIds.Count == 1 && matchedObj.Count == 1)
+                                                Session["AuthToken"] = Guid.NewGuid().ToString();
+                                                Response.Cookies["AuthToken"].Value = Session["AuthToken"].ToString();
+                                                Session["CompanyId"] = matchedObj[0].CompanyId;
+                                                Session["CompanyName"] = matchedObj[0].CompanyNm;
+                                                Session["ModuleId"] = matchedObj[0].ModuleId;
+                                                Session["ModuleName"] = matchedObj[0].ModuleNm;
+                                                Session["ModuleFolder"] = matchedObj[0].ModuleFolder;
+                                                Session["ModuleDatabase"] = matchedObj[0].ModuleDataBase;
+                                                string sModule = Convert.ToString(ConfigurationManager.AppSettings["Module"]);
+                                                if (sModule.ToUpper() == "UPSI")
                                                 {
-                                                    Session["AuthToken"] = Guid.NewGuid().ToString();
-                                                    Response.Cookies["AuthToken"].Value = Session["AuthToken"].ToString();
-                                                    Session["CompanyId"] = matchedObj[0].CompanyId;
-                                                    Session["CompanyName"] = matchedObj[0].CompanyNm;
-                                                    Session["ModuleId"] = matchedObj[0].ModuleId;
-                                                    Session["ModuleName"] = matchedObj[0].ModuleNm;
-                                                    Session["ModuleFolder"] = matchedObj[0].ModuleFolder;
-                                                    Session["ModuleDatabase"] = matchedObj[0].ModuleDataBase;
-                                                    string sModule = Convert.ToString(ConfigurationManager.AppSettings["Module"]);
-                                                    if (sModule.ToUpper() == "UPSI")
-                                                    {
-                                                        Response.Redirect(Session["ModuleFolder"] + "/" + "DashboardUpsi.aspx", false);
-                                                    }
-                                                    else
-                                                    {
-                                                        Response.Redirect(Session["ModuleFolder"] + "/" + "PITDashboard.aspx", false);
-                                                        //Response.Redirect(Session["ModuleFolder"] + "/" + "Dashboard.aspx");
-                                                    }
-                                                    //Response.Redirect(Session["ModuleFolder"] + "/" + "Dashboard.aspx");
+                                                    Response.Redirect(Session["ModuleFolder"] + "/" + "DashboardUpsi.aspx", false);
                                                 }
                                                 else
                                                 {
-                                                    ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){openModal();},1000);", true);
-                                                    sb.Append("<div class='row'>");
-                                                    int count = 0;
-                                                    foreach (UserAccess usr in objResponse.User.UAccess)
-                                                    {
-                                                        if (usr.CompanyId == companyId)
-                                                        {
-                                                            if (count == 0)
-                                                            {
-                                                                sb.Append("<img style='height:126px;padding-left:20px;padding-right:30px;' src='assets/logos/Company/" + usr.CompanyLogo + "' alt='" + usr.CompanyNm + "'/>");
-                                                            }
-                                                            sb.Append("<a runat='server' href=\"javascript:GoToDashBoard('" + companyId + "','" + usr.CompanyNm + "'," + usr.ModuleId + ",'" + usr.ModuleNm + "','" + usr.ModuleFolder + "','" + usr.ModuleDataBase + "', '" + Convert.ToString(login.LoginId) + "')\"><img style='height:126px;padding-right:10px;' src='assets/logos/Module/" + usr.ModuleLogo + "' alt='" + usr.ModuleNm + "' /></a>");
-                                                            count++;
-                                                        }
-                                                    }
-                                                    sb.Append("</div>");
-                                                    sb.Append("</br>");
+                                                    Response.Redirect(Session["ModuleFolder"] + "/" + "PITDashboard.aspx", false);
+                                                    //Response.Redirect(Session["ModuleFolder"] + "/" + "Dashboard.aspx");
                                                 }
+                                                //Response.Redirect(Session["ModuleFolder"] + "/" + "Dashboard.aspx");
                                             }
-                                            ShowListing.InnerHtml = sb.ToString(); 
+                                            else
+                                            {
+                                                ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){openModal();},1000);", true);
+                                                sb.Append("<div class='row'>");
+                                                int count = 0;
+                                                foreach (UserAccess usr in objResponse.User.UAccess)
+                                                {
+                                                    if (usr.CompanyId == companyId)
+                                                    {
+                                                        if (count == 0)
+                                                        {
+                                                            sb.Append("<img style='height:126px;padding-left:20px;padding-right:30px;' src='assets/logos/Company/" + usr.CompanyLogo + "' alt='" + usr.CompanyNm + "'/>");
+                                                        }
+                                                        sb.Append("<a runat='server' href=\"javascript:GoToDashBoard('" + companyId + "','" + usr.CompanyNm + "'," + usr.ModuleId + ",'" + usr.ModuleNm + "','" + usr.ModuleFolder + "','" + usr.ModuleDataBase + "', '" + Convert.ToString(login.LoginId) + "')\"><img style='height:126px;padding-right:10px;' src='assets/logos/Module/" + usr.ModuleLogo + "' alt='" + usr.ModuleNm + "' /></a>");
+                                                        count++;
+                                                    }
+                                                }
+                                                sb.Append("</div>");
+                                                sb.Append("</br>");
+                                            }
                                         }
-                                        else if (sRes.StatusFl == false && sRes.Msg == "Sorry You have already logged in with another Browser or Another System")
-                                        {
-                                            ClientScript.RegisterClientScriptBlock(this.GetType(), "alert", "<script type = 'text/javascript'>window.onload=function(){alert('Sorry You have already logged in with another Browser or Another System')};</script>");
-                                            UserName.Text = "";
-                                            Password.Text = "";
-                                        }
+                                        ShowListing.InnerHtml = sb.ToString();
                                     }
                                 }
                                 else
@@ -311,7 +248,6 @@ namespace ProcsDLL
         {
             try
             {
-                HttpBrowserCapabilities bc = Request.Browser;//nc
                 ProcsDLL.Models.Login.Modal.Login login = new ProcsDLL.Models.Login.Modal.Login();
                 if (!String.IsNullOrEmpty(HttpContext.Current.User.Identity.Name))
                 {
@@ -344,102 +280,64 @@ namespace ProcsDLL
                         Session["AdminDb"] = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["AdminDB"]), true);
                         Session["AuthToken"] = Guid.NewGuid().ToString();
                         Response.Cookies["AuthToken"].Value = Session["AuthToken"].ToString();
-                        //===session=========
-                        if (HttpContext.Current.Request.UserAgent.Contains("Edg"))
+
+                        bool isPasswordChanged = objlogin.IsPasswordChanged();
+                        if (isPasswordChanged)
                         {
-                            Session["Browser"] = "Microsoft Edge";
-                        }
-                        else
-                        {
-                            Session["Browser"] = bc.Browser;//nc
+                            Response.Redirect("ChangePassword.aspx", false);
                         }
 
-                        Session["MacId"] = GetClientMAC(GetIPAddress());//nc
-                        Session["IP"] = GetIPAddress();//nc
-
-                        SessionDTO sDTO = new SessionDTO();
-                        sDTO.EMP_ID = Convert.ToString(login.LoginId);
-                        sDTO.MAC_ID = GetClientMAC(GetIPAddress());
-                        sDTO.IP = GetIPAddress().ToString();
-                        if (HttpContext.Current.Request.UserAgent.Contains("Edg"))
+                        StringBuilder sb = new StringBuilder();
+                        HashSet<Int32> companyIds = new HashSet<Int32>();
+                        foreach (UserAccess usr in objResponse.User.UAccess)
                         {
-                            sDTO.BROWSER = "Microsoft Edge";
-                        }
-                        else
-                        {
-                            sDTO.BROWSER = bc.Browser;
+                            companyIds.Add(usr.CompanyId);
                         }
 
-
-                        SessionRequest sReq = new SessionRequest(sDTO);
-                        SessionResponse sRes = sReq.SaveSession();
-                        //================
-                        if (sRes.StatusFl == true)
+                        foreach (Int32 companyId in companyIds)
                         {
-                            bool isPasswordChanged = objlogin.IsPasswordChanged();
-                            if (isPasswordChanged)
+                            var matchedObj = objResponse.User.UAccess.Where(p => p.CompanyId == companyId).ToList();
+                            if (companyIds.Count == 1 && matchedObj.Count == 1)
                             {
-                                Response.Redirect("ChangePassword.aspx", false);
-                            }
-
-                            StringBuilder sb = new StringBuilder();
-                            HashSet<Int32> companyIds = new HashSet<Int32>();
-                            foreach (UserAccess usr in objResponse.User.UAccess)
-                            {
-                                companyIds.Add(usr.CompanyId);
-                            }
-
-                            foreach (Int32 companyId in companyIds)
-                            {
-                                var matchedObj = objResponse.User.UAccess.Where(p => p.CompanyId == companyId).ToList();
-                                if (companyIds.Count == 1 && matchedObj.Count == 1)
+                                Session["CompanyId"] = matchedObj[0].CompanyId;
+                                Session["CompanyName"] = matchedObj[0].CompanyNm;
+                                Session["ModuleId"] = matchedObj[0].ModuleId;
+                                Session["ModuleName"] = matchedObj[0].ModuleNm;
+                                Session["ModuleFolder"] = matchedObj[0].ModuleFolder;
+                                Session["ModuleDatabase"] = matchedObj[0].ModuleDataBase;
+                                //Response.Redirect(Session["ModuleFolder"] + "/" + "Dashboard.aspx", false);
+                                string sModule = Convert.ToString(ConfigurationManager.AppSettings["Module"]);
+                                if (sModule.ToUpper() == "UPSI")
                                 {
-                                    Session["CompanyId"] = matchedObj[0].CompanyId;
-                                    Session["CompanyName"] = matchedObj[0].CompanyNm;
-                                    Session["ModuleId"] = matchedObj[0].ModuleId;
-                                    Session["ModuleName"] = matchedObj[0].ModuleNm;
-                                    Session["ModuleFolder"] = matchedObj[0].ModuleFolder;
-                                    Session["ModuleDatabase"] = matchedObj[0].ModuleDataBase;
-                                    //Response.Redirect(Session["ModuleFolder"] + "/" + "Dashboard.aspx", false);
-                                    string sModule = Convert.ToString(ConfigurationManager.AppSettings["Module"]);
-                                    if (sModule.ToUpper() == "UPSI")
-                                    {
-                                        Response.Redirect(Session["ModuleFolder"] + "/" + "DashboardUpsi.aspx", false);
-                                    }
-                                    else
-                                    {
-                                        Response.Redirect(Session["ModuleFolder"] + "/" + "PITDashboard.aspx", false);
-                                    }
+                                    Response.Redirect(Session["ModuleFolder"] + "/" + "DashboardUpsi.aspx", false);
                                 }
                                 else
                                 {
-                                    ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){openModal();},1000);", true);
-                                    sb.Append("<div class='row'>");
-                                    int count = 0;
-                                    foreach (UserAccess usr in objResponse.User.UAccess)
-                                    {
-                                        if (usr.CompanyId == companyId)
-                                        {
-                                            if (count == 0)
-                                            {
-                                                sb.Append("<img style='height:126px;padding-left:20px;padding-right:30px;' src='assets/logos/Company/" + usr.CompanyLogo + "' alt='" + usr.CompanyNm + "'/>");
-                                            }
-                                            sb.Append("<a runat='server' href=\"javascript:GoToDashBoard('" + companyId + "','" + usr.CompanyNm + "'," + usr.ModuleId + ",'" + usr.ModuleNm + "','" + usr.ModuleFolder + "','" + usr.ModuleDataBase + "', '" + Convert.ToString(login.LoginId) + "')\"><img style='height:126px;padding-right:10px;' src='assets/logos/Module/" + usr.ModuleLogo + "' alt='" + usr.ModuleNm + "' /></a>");
-                                            count++;
-                                        }
-                                    }
-                                    sb.Append("</div>");
-                                    sb.Append("</br>");
+                                    Response.Redirect(Session["ModuleFolder"] + "/" + "PITDashboard.aspx", false);
                                 }
                             }
-                            ShowListing.InnerHtml = sb.ToString(); 
+                            else
+                            {
+                                ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){openModal();},1000);", true);
+                                sb.Append("<div class='row'>");
+                                int count = 0;
+                                foreach (UserAccess usr in objResponse.User.UAccess)
+                                {
+                                    if (usr.CompanyId == companyId)
+                                    {
+                                        if (count == 0)
+                                        {
+                                            sb.Append("<img style='height:126px;padding-left:20px;padding-right:30px;' src='assets/logos/Company/" + usr.CompanyLogo + "' alt='" + usr.CompanyNm + "'/>");
+                                        }
+                                        sb.Append("<a runat='server' href=\"javascript:GoToDashBoard('" + companyId + "','" + usr.CompanyNm + "'," + usr.ModuleId + ",'" + usr.ModuleNm + "','" + usr.ModuleFolder + "','" + usr.ModuleDataBase + "', '" + Convert.ToString(login.LoginId) + "')\"><img style='height:126px;padding-right:10px;' src='assets/logos/Module/" + usr.ModuleLogo + "' alt='" + usr.ModuleNm + "' /></a>");
+                                        count++;
+                                    }
+                                }
+                                sb.Append("</div>");
+                                sb.Append("</br>");
+                            }
                         }
-                        else if (sRes.StatusFl == false && sRes.Msg == "Sorry You have already logged in with another Browser or Another System")
-                        {
-                            ClientScript.RegisterClientScriptBlock(this.GetType(), "alert", "<script type = 'text/javascript'>window.onload=function(){alert('Sorry You have already logged in with another Browser or Another System')};</script>");
-                            UserName.Text = "";
-                            Password.Text = "";
-                        }
+                        ShowListing.InnerHtml = sb.ToString();
                     }
                 }
                 else
@@ -453,84 +351,8 @@ namespace ProcsDLL
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){unValidCredential();},1000);", true);
             }
         }
-
-        //protected void ChkAuthType_click(object sender, EventArgs e)
-        //{
-
-        //    //if (Convert.ToString(ConfigurationManager.AppSettings["SSOType"]) == "Cloud")
-        //    //{
-        //    //    GenerateSamlURL();
-        //    //}
-        //    string abc= "just test";
-        //}
-
-        [WebMethod]
-        public static void ReceiveDataFromClient(string data)
+        protected void UserName_TextChanged(object sender, EventArgs e)
         {
-             
-              chkUserType = data;
-            //return "Server received: " + data;
         }
-
-        public static string GetIPAddress()
-        {
-            System.Web.HttpContext context = System.Web.HttpContext.Current;
-            string ipAddress = context.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
-
-            if (!string.IsNullOrEmpty(ipAddress))
-            {
-                string[] addresses = ipAddress.Split(',');
-                if (addresses.Length != 0)
-                {
-                    return addresses[0];
-                }
-            }
-
-            return context.Request.ServerVariables["REMOTE_ADDR"];
-        }
-        [DllImport("Iphlpapi.dll")]
-        private static extern int SendARP(Int32 dest, Int32 host, ref Int64 mac, ref Int32 length);
-        [DllImport("Ws2_32.dll")]
-        private static extern Int32 inet_addr(string ip);
-
-        private static string GetClientMAC(string strClientIP)
-        {
-            string mac_dest = "";
-            try
-            {
-                Int32 ldest = inet_addr(strClientIP);
-                Int32 lhost = inet_addr("");
-                Int64 macinfo = new Int64();
-                Int32 len = 6;
-                int res = SendARP(ldest, 0, ref macinfo, ref len);
-                string mac_src = macinfo.ToString("X");
-
-                while (mac_src.Length < 12)
-                {
-                    mac_src = mac_src.Insert(0, "0");
-                }
-
-                for (int i = 0; i < 11; i++)
-                {
-                    if (0 == (i % 2))
-                    {
-                        if (i == 10)
-                        {
-                            mac_dest = mac_dest.Insert(0, mac_src.Substring(i, 2));
-                        }
-                        else
-                        {
-                            mac_dest = "-" + mac_dest.Insert(0, mac_src.Substring(i, 2));
-                        }
-                    }
-                }
-            }
-            catch (Exception err)
-            {
-                throw new Exception("L?i " + err.Message);
-            }
-            return mac_dest;
-        }
-
     }
 }

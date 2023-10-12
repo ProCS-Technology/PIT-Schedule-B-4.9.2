@@ -6,7 +6,6 @@ namespace ProcsDLL.Models.InsiderTrading.Model
     public class User : BaseEntity
     {
         public Int32 ID { set; get; }
-        //public String LOG_ID { set; get; }
         public Int32 RELATION_ID { set; get; }
         public String USER_NM { set; get; }
         public Int32 TaskId { set; get; }
@@ -74,7 +73,6 @@ namespace ProcsDLL.Models.InsiderTrading.Model
         public PhysicalHoldingDetail physicalHoldingDetailInfo { set; get; }
         public Email email { set; get; }
         public List<Email> emailReport { set; get; }
-        public List<string> emailReportt { set; get; }
         public string upsiType { set; get; }
         public string upsiSharedWith { set; get; }
         public string upsiSharedOn { set; get; }

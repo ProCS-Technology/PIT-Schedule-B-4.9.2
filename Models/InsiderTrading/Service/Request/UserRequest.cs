@@ -83,13 +83,6 @@ namespace ProcsDLL.Models.InsiderTrading.Service.Request
             UserRepository oRepository = new UserRepository();
             return oRepository.GetUserListByBusinessUnitId(_User);
         }
-        //===========================
-        public UserResponse GetUserAuthTypeByLoginId()
-        {
-            UserRepository oRepository = new UserRepository();
-            return oRepository.GetUserAuthTypeByLoginId(_User);
-        }
-        //============================
         public UserResponse AssignedApprover()
         {
             UserRepository oRepository = new UserRepository();

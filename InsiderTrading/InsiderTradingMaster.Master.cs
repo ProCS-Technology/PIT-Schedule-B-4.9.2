@@ -8,6 +8,7 @@ using System.Collections;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Text;
 using System.Web;
 using System.Web.UI;
@@ -34,6 +35,13 @@ namespace ProcsDLL.InsiderTrading
             {
                 Response.Redirect("../LogOut.aspx");
             }
+
+            string sAccess = CheckGetPageAccess();
+            if (sAccess == "No")
+            {
+                Response.Redirect("PITDashboard.aspx", true);
+            }
+
             string sVersion = Convert.ToString(ConfigurationManager.AppSettings["Version"]);
             spnVersion.InnerHtml = sVersion;
             string TokenKeyEncrypted = CryptorEngine.Encrypt(random.Next(59999, 199999).ToString(), true);
@@ -149,6 +157,76 @@ namespace ProcsDLL.InsiderTrading
                 }
             }
         }
+        private string CheckGetPageAccess()
+        {
+            string pageName = Path.GetFileNameWithoutExtension(Page.AppRelativeVirtualPath);
+            if (pageName.ToUpper() == "PITDASHBOARD")
+            {
+                return "Yes";
+            }
+            else
+            {
+                try
+                {
+                    string sLoginId = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
+                    string sConStr = CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ConnectionStringIT"], true);
+                    string sAdminDb = CryptorEngine.Decrypt(ConfigurationManager.AppSettings["AdminDB"], true);
+                    Int32 iCmpnId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                    Int32 iCnt = 0;
+                    using (SqlConnection sCon = new SqlConnection(sConStr))
+                    {
+                        sCon.Open();
+                        SqlCommand sCmd = new SqlCommand();
+                        sCmd.CommandText = "SELECT ISNULL(A.IS_APPROVER,'') AS IS_APPROVER,B.ROLE_NAME FROM PROCS_INSIDER_USER(NOLOCK) A " +
+                            "INNER JOIN PROCS_INSIDER_ROLE_MSTR(NOLOCK) B ON A.USER_ROLE=B.ROLE_ID " +
+                            "WHERE USER_LOGIN='" + sLoginId + "'";
+                        sCmd.CommandType = CommandType.Text;
+                        sCmd.Connection = sCon;
+
+                        DataTable dt = new DataTable();
+                        SqlDataAdapter da = new SqlDataAdapter(sCmd);
+                        da.Fill(dt);
+                        if (dt.Rows.Count > 0)
+                        {
+                            if (Convert.ToString(dt.Rows[0]["IS_APPROVER"]) == "Yes")
+                            {
+                                sCmd.CommandText = "SELECT COUNT(*) FROM PROCS_INSIDER_MENU_ACCESS(NOLOCK) " +
+                                    "WHERE MENU_PAGE='" + pageName + "' AND CO_ACCESS='Y'";
+                                sCmd.CommandType = CommandType.Text;
+                                iCnt = Convert.ToInt32(sCmd.ExecuteScalar());
+                            }
+                            else if (Convert.ToString(dt.Rows[0]["ROLE_NAME"]) == "Admin")
+                            {
+                                sCmd.CommandText = "SELECT COUNT(*) FROM PROCS_INSIDER_MENU_ACCESS(NOLOCK) " +
+                                    "WHERE MENU_PAGE='" + pageName + "' AND ADMIN_ACCESS='Y'";
+                                sCmd.CommandType = CommandType.Text;
+                                iCnt = Convert.ToInt32(sCmd.ExecuteScalar());
+                            }
+                            else
+                            {
+                                sCmd.CommandText = "SELECT COUNT(*) FROM PROCS_INSIDER_MENU_ACCESS(NOLOCK) " +
+                                    "WHERE MENU_PAGE='" + pageName + "' AND DP_ACCESS='Y'";
+                                sCmd.CommandType = CommandType.Text;
+                                iCnt = Convert.ToInt32(sCmd.ExecuteScalar());
+                            }
+                        }
+                    }
+                    if (iCnt > 0)
+                    {
+                        return "Yes";
+                    }
+                    else
+                    {
+                        return "No";
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+                return "No";
+            }
+        }
         private void getMenuItems(DataRow[] dr1, string strGrpName, DataTable dt1)
         {
             ArrayList arrlist = new ArrayList();
@@ -189,7 +267,6 @@ namespace ProcsDLL.InsiderTrading
                 UserResponse objResponse = objUser.GetUserDetails();
                 if (objResponse.StatusFl)
                 {
-                    LstLogIn.InnerHtml ="Last Login: "+ LastLogin();
                     ImgUserUploadedImageHeader.Attributes["src"] = "images/user/" + objResponse.User.uploadAvatar;
                     SpUserNameHeader.InnerHtml = objResponse.User.USER_NM;
                     Session["BusinessUnitId"] = objResponse.User.businessUnit.businessUnitId;
@@ -203,33 +280,6 @@ namespace ProcsDLL.InsiderTrading
                 throw ex;
             }
 
-        }
-
-        private string LastLogin()
-        {
-            DataTable dtcomp = new DataTable();
-            try
-            {
-                String sConnectionString = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["ConnectionString"]), true);
-                SqlConnection sConn = new SqlConnection(sConnectionString);
-                sConn.Open();
-                sConn.ChangeDatabase(Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ITDB"], true)));
-                SqlCommand sCmd = new SqlCommand();
-                sCmd.Connection = sConn;
-                sCmd.CommandType = CommandType.Text;
-                sCmd.CommandText = "SELECT MAX(CONVERT(VARCHAR,SESSION_START_TIME,113)) as LAST_SESSION_START_TIME FROM PIT_INSIDER_SESSION WHERE SESSION_START_TIME < (SELECT MAX(SESSION_START_TIME) FROM PIT_INSIDER_SESSION) and EMP_ID='" + Convert.ToString(Session["EmployeeId"]) + "'";
-                SqlDataAdapter da = new SqlDataAdapter(sCmd);
-
-               
-                da.Fill(dtcomp);
-                
-            }
-            catch (Exception ex)
-            {
-
-                 
-            }
-            return Convert.ToString(dtcomp.Rows[0]["LAST_SESSION_START_TIME"]);
         }
         protected void RecoverPassword(Object sender, EventArgs e)
         {

@@ -615,51 +615,6 @@ namespace ProcsDLL.Models.InsiderTrading.Repository
                 return oUser;
             }
         }
-        //=====================================================
-        public UserResponse GetUserAuthTypeByLoginId(User objUser)
-        {
-            try
-            {
-                SqlParameter[] parameters = new SqlParameter[6];
-                parameters[0] = new SqlParameter("@Mode", "GET_USER_AUTH_TYPE_BY_LOGIN_ID");
-                parameters[1] = new SqlParameter("@SET_COUNT", SqlDbType.Int);
-                parameters[1].Direction = ParameterDirection.Output;
-                parameters[2] = new SqlParameter("@LOGIN_ID", objUser.LOGIN_ID);
-                 
-
-                UserResponse oUser = new UserResponse();
-                SqlDataReader rdr = SQLHelper.ExecuteReader(SQLHelper.GetConnString(), CommandType.StoredProcedure, "SP_PROCS_INSIDER_USER_PERSONAL_MASTER", Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ITDB"], true)), parameters);
-
-                if (rdr.HasRows)
-                {
-                    while (rdr.Read())
-                    {
-                        User obj = new User();
-                        //obj.ID = Convert.ToInt32(rdr["ID"]);
-                        obj.UserType = (!String.IsNullOrEmpty(Convert.ToString(rdr["USER_TYPE"]))) ? Convert.ToString(rdr["USER_TYPE"]) : String.Empty;
-                         
-                        oUser.User=obj;
-                    }
-                    oUser.StatusFl = true;
-                    oUser.Msg = "Data has been fetched successfully !";
-                }
-                else
-                {
-                    oUser.StatusFl = false;
-                    oUser.Msg = "No data found !";
-                }
-                rdr.Close();
-                return oUser;
-            }
-            catch (Exception ex)
-            {
-                UserResponse oUser = new UserResponse();
-                oUser.StatusFl = false;
-                oUser.Msg = "Processing failed, because of system error !";
-                return oUser;
-            }
-        }
-        //==============================================
         public UserResponse AssignedApprover(User objUser)
         {
             try

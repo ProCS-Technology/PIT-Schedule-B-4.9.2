@@ -1,7 +1,4 @@
-﻿using ProcsDLL.Models.Login.Modal;
-using ProcsDLL.Models.Login.Service.Request;
-using ProcsDLL.Models.Login.Service.Response;
-using System;
+﻿using System;
 using System.Web;
 namespace ProcsDLL
 {
@@ -9,14 +6,6 @@ namespace ProcsDLL
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            SessionDTO sDTO = new SessionDTO();
-            sDTO.EMP_ID = Convert.ToString(Session["EmployeeId"]);
-            sDTO.MAC_ID = Convert.ToString(Session["MacId"]);
-            sDTO.IP = Convert.ToString(Session["IP"]);
-            sDTO.BROWSER = Convert.ToString(Session["Browser"]);
-            SessionRequest sReq = new SessionRequest(sDTO);
-            SessionResponse sRes1 = sReq.DeleteSession();
-
             Session.Abandon();
             Session.Clear();
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
