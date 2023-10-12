@@ -16,6 +16,10 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Script.Serialization;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net;
+using System.Net.Http.Headers;
+
 namespace ProcsDLL.Controllers.InsiderTrading
 {
     [RoutePrefix("api/Benpos")]
@@ -339,6 +343,72 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 return objResponse;
             }
         }
+        string sInsiderDb = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["ITDB"]), true);
+        //============get benpos file id by skm==================
+        [Route("GetBenposFile")]
+        [HttpGet]
+        [SwaggerOperation(Tags = new[] { "Benpos APIs" })]
+        public HttpResponseMessage GetBenposFile(string BenposId)
+        {
+           string _sql = "SELECT FILENAME FROM  PROCS_INSIDER_BENPOS_HDR " +
+                                   "WHERE HDR_ID=" + BenposId ;
+            string sFileName = (string)SQLHelper.ExecuteScalar(SQLHelper.GetConnString(), CommandType.Text, _sql, sInsiderDb, null);
+
+            string filePath = HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"+ sFileName);
+             
+
+            byte[] fileBook = File.ReadAllBytes(filePath);
+            MemoryStream stream = new MemoryStream();
+            string excelBase64String = Convert.ToBase64String(fileBook);
+            StreamWriter excelWriter = new StreamWriter(stream);
+            excelWriter.Write(excelBase64String);
+            excelWriter.Flush();
+            stream.Position = 0;
+            HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+            httpResponseMessage.Content = new StreamContent(stream);
+            httpResponseMessage.Content.Headers.Add("x-filename", "ExcelReport.xlsx");
+            httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+            httpResponseMessage.Content.Headers.ContentDisposition =
+                new ContentDispositionHeaderValue("attachment");
+            httpResponseMessage.Content.Headers.ContentDisposition.FileName = "ExcelReport.xlsx";
+            httpResponseMessage.StatusCode = HttpStatusCode.OK;
+            return httpResponseMessage;
+
+        }
+        //===================end=================
+
+        //============get Esop file id by skm==================
+        [Route("GetEsopFile")]
+        [HttpGet]
+        [SwaggerOperation(Tags = new[] { "Esop APIs" })]
+        public HttpResponseMessage GetEsopFile(string EsopId)
+        {
+            string _sql = "SELECT FILENAME FROM  PROCS_INSIDER_ESOP_HDR " +
+                                      "WHERE HDR_ID=" + EsopId;
+            string sFileName = (string)SQLHelper.ExecuteScalar(SQLHelper.GetConnString(), CommandType.Text, _sql, sInsiderDb, null);
+
+            string filePath = HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/" + sFileName);
+             
+
+            byte[] fileBook = File.ReadAllBytes(filePath);
+            MemoryStream stream = new MemoryStream();
+            string excelBase64String = Convert.ToBase64String(fileBook);
+            StreamWriter excelWriter = new StreamWriter(stream);
+            excelWriter.Write(excelBase64String);
+            excelWriter.Flush();
+            stream.Position = 0;
+            HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+            httpResponseMessage.Content = new StreamContent(stream);
+            httpResponseMessage.Content.Headers.Add("x-filename", "ExcelReport.xlsx");
+            httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+            httpResponseMessage.Content.Headers.ContentDisposition =
+                new ContentDispositionHeaderValue("attachment");
+            httpResponseMessage.Content.Headers.ContentDisposition.FileName = "ExcelReport.xlsx";
+            httpResponseMessage.StatusCode = HttpStatusCode.OK;
+            return httpResponseMessage;
+
+        }
+        //===================end=================
         [Route("SaveEsopHdr")]
         [HttpPost]
         [SwaggerOperation(Tags = new[] { "Benpos APIs" })]

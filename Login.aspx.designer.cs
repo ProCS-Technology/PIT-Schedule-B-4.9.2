@@ -114,6 +114,24 @@ namespace ProcsDLL
         protected global::System.Web.UI.WebControls.HiddenField authenticationType;
 
         /// <summary>
+        /// hdnChkAuthType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnChkAuthType;
+
+        /// <summary>
+        /// hdnChkSSOType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnChkSSOType;
+
+        /// <summary>
         /// ImageCaptcha control.
         /// </summary>
         /// <remarks>

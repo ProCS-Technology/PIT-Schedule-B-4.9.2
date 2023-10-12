@@ -423,6 +423,53 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 return objResponse;
             }
         }
+
+        //====================================
+        [Route("GetUserAuthTypeByLoginId")]
+        [HttpPost]
+        [SwaggerOperation(Tags = new[] { "User APIs" })]
+        public UserResponse GetUserAuthTypeByLoginId()
+        {
+            try
+            {
+                if (HttpContext.Current.Session.Count == 0)
+                {
+                    UserResponse objSessionResponse = new UserResponse();
+                    objSessionResponse.StatusFl = false;
+                    objSessionResponse.Msg = "SessionExpired";
+                    return objSessionResponse;
+                }
+
+                string input;
+                using (System.IO.StreamReader sr = new System.IO.StreamReader(HttpContext.Current.Request.InputStream))
+                {
+                    input = sr.ReadToEnd();
+                }
+                User user = new JavaScriptSerializer().Deserialize<User>(input);
+                user.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                user.moduleId = Convert.ToInt32(HttpContext.Current.Session["ModuleId"]);
+                user.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
+                user.ADMIN_DATABASE = Convert.ToString(HttpContext.Current.Session["AdminDb"]);
+                if (!user.ValidateInput())
+                {
+                    UserResponse objResponse = new UserResponse();
+                    objResponse.StatusFl = false;
+                    objResponse.Msg = sXSSErrMsg;
+                    return objResponse;
+                }
+                UserRequest gReqUserList = new UserRequest(user);
+                UserResponse gResUserList = gReqUserList.GetUserAuthTypeByLoginId();
+                return gResUserList;
+            }
+            catch (Exception ex)
+            {
+                UserResponse objResponse = new UserResponse();
+                objResponse.StatusFl = false;
+                objResponse.Msg = ex.Message;
+                return objResponse;
+            }
+        }
+        //======================================
         [Route("GetUserListForApprover")]
         [HttpGet]
         [SwaggerOperation(Tags = new[] { "User APIs" })]

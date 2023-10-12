@@ -7,6 +7,7 @@
         <title>ProCS-Insider Trading</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
         <link href="../assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
         <link href="../assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
         <link href="../assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -189,7 +190,7 @@
         <div id="LoaderProgerss" style="display:none;background-color:#000;opacity:0.9;position:fixed;left:0px;top:0px;width:100%;height:100%;z-index:2147483647;">
             <div class="waiting-text">
                 <h4>
-                    <img src="../assets/global/img/loading-spinner-blue.gif" alt="" />&nbsp;&nbsp;Please wait. Processing request...
+                    <img src="../assets/global/img/loading-spinner-blue.gif" alt="" />  Please wait. Processing request...
                 </h4>
                 <div style="height:200px;overflow-y:scroll;width:100%;">
                     <label id="lblMsg" runat="server"></label>
@@ -211,14 +212,23 @@
                             <li class="text-center" id="liLbl" runat="server">Insider Trading Compliance Management System</li>
                         </ul>
                         <ul class="nav navbar-nav pull-right">
-                            <li class="separator hide"></li>
-                            <li class="separator hide"></li>
+
+                            <li class="separator hide">
+                                
+                            </li>
+                            <li class="separator hide">
+                                
+                            </li>
                             <li class="dropdown dropdown-user">
-                                <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                                
+                                <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true" style="padding:7px">
+                                    <%--<span id="LstLogIn" runat="server" style="color: floralwhite;">Last Login </span>--%>
                                     <img id="ImgUserUploadedImageHeader" runat="server" alt="" style="background-color: white" class="img-circle" src="../assets/layouts/layout/img/avatar3_small.jpg" />
                                     <span id="SpUserNameHeader" runat="server" class="username username-hide-on-mobile My-User-Header-Name">Nick </span>
                                     <i style="color: black;" class="fa fa-angle-down"></i>
+                                    
                                 </a>
+                                <span id="LstLogIn" runat="server" style="color: floralwhite; margin-bottom:1px" class="username username-hide-on-mobile My-User-Header-Name">Last Login </span>
                                 <ul class="dropdown-menu dropdown-menu-default">
                                     <li id="liRecoverPassword">
                                         <a onserverclick="RecoverPassword" runat="server" style="font-family: Trebuchet MS!important;">
