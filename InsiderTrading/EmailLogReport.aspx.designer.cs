@@ -33,6 +33,33 @@ namespace ProcsDLL.InsiderTrading
         protected global::System.Web.UI.WebControls.HiddenField HiddenShowModal;
 
         /// <summary>
+        /// scriptManager1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.ScriptManager scriptManager1;
+
+        /// <summary>
+        /// updatepanel1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel updatepanel1;
+
+        /// <summary>
+        /// hdnEmailTask control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox hdnEmailTask;
+
+        /// <summary>
         /// DropDownListModule control.
         /// </summary>
         /// <remarks>
@@ -69,6 +96,15 @@ namespace ProcsDLL.InsiderTrading
         protected global::System.Web.UI.HtmlControls.HtmlInputText txtToDate;
 
         /// <summary>
+        /// ddlStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlStatus;
+
+        /// <summary>
         /// ButtonSearch control.
         /// </summary>
         /// <remarks>
@@ -78,6 +114,15 @@ namespace ProcsDLL.InsiderTrading
         protected global::System.Web.UI.WebControls.Button ButtonSearch;
 
         /// <summary>
+        /// btnReSendMail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnReSendMail;
+
+        /// <summary>
         /// RepeaterTbl control.
         /// </summary>
         /// <remarks>
@@ -85,6 +130,15 @@ namespace ProcsDLL.InsiderTrading
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater RepeaterTbl;
+
+        /// <summary>
+        /// HiddenFieldLogIds control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField HiddenFieldLogIds;
 
         /// <summary>
         /// dvMsg control.

@@ -11,6 +11,8 @@ using System.Net.Mail;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Web.Services;
+using ProcsDLL.Models.InsiderTrading.Model;
 namespace ProcsDLL.InsiderTrading
 {
     public partial class Send_Message : System.Web.UI.Page
@@ -24,6 +26,28 @@ namespace ProcsDLL.InsiderTrading
         string password = String.Empty;
         bool userDefaultCredential;
         String ConnectionString = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["ConnectionString"]), true);
+
+        private const string sessionKey = "CustomEmail";
+        public Progress Progress
+        {
+            get
+            {
+                if (Session[sessionKey] == null)
+                {
+                    Session.Add(sessionKey, new Progress());
+                }
+                return Session[sessionKey] as Progress;
+            }
+            set
+            {
+                if (Session[sessionKey] == null)
+                {
+                    Session.Add(sessionKey, new Progress());
+                }
+                Session[sessionKey] = value;
+            }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
@@ -69,7 +93,130 @@ namespace ProcsDLL.InsiderTrading
             }
         }
 
+
+        public delegate void Run();
         protected void ButtonSend_OnClick(object sender, EventArgs e)
+        {
+            try
+            {
+                //int iUser = ddlUsers.SelectedIndex;
+                //string sUser = txtSelectedUsers.Text;
+                //string bccUsers = TextBoxBccEmail.Text;
+                //string OtherEmailId = TextOtherEmail.Text;
+
+                //string selected = Request.Form["TreeSelect"];
+                //if (string.IsNullOrEmpty(selected))
+                //{
+                //    selected = OtherEmailId;
+                //}
+                //ClientScript.RegisterStartupScript(this.GetType(), "", selected, true);
+
+                //if (OtherEmailId == "" && selected == null)
+                //{
+                //}
+                //else
+                //{
+
+                //    string[] arrAllRole = selected.Split(new char[] { ',' });
+                //    string[] arrOtherEmailId = OtherEmailId.Split(new char[] { ',' });
+                //    if (OtherEmailId == "")
+                //    {
+                //        string[] result = arrAllRole;
+                //        string[] arrUsers = sUser.Split(new char[] { ',' });
+                //        List<string> attachments = new List<string>();
+                //        if (FileUpload1.HasFiles)
+                //        {
+                //            string strFolder;
+                //            string strFilePath;
+                //            strFolder = Server.MapPath("~/InsiderTrading/emailAttachment/SendEmail/");
+                //            if (!Directory.Exists(strFolder))
+                //            {
+                //                Directory.CreateDirectory(strFolder);
+                //            }
+                //            foreach (HttpPostedFile uploadedFile in FileUpload1.PostedFiles)
+                //            {
+                //                strFilePath = strFolder + uploadedFile.FileName;
+                //                uploadedFile.SaveAs(strFilePath);
+                //                attachments.Add(strFilePath);
+                //            }
+                //        }
+
+                //        int CompanyId = int.Parse(HttpContext.Current.Session["CompanyId"].ToString());
+                //        var database = Convert.ToString(Session["ModuleDatabase"]);
+                //        var AdminDB = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
+
+                //        foreach (string sEmails in result)
+                //        {
+                //            EmailSender.SendMail(
+                //            sEmails, TextBoxSubject.Text, TextareaAppTemplate.Value.Replace("[UserId]", sEmails).ToString(),
+                //            attachments, "Custom Email", Convert.ToString(Session["CompanyId"]), bccUsers, null, Convert.ToString(Session["EmployeeId"])
+                //            );
+                //        }
+                //    }
+                //    else
+                //    {
+                //        string[] result = arrAllRole.Concat(arrOtherEmailId).ToArray();
+                //        string[] arrUsers = sUser.Split(new char[] { ',' });
+                //        List<string> attachments = new List<string>();
+                //        if (FileUpload1.HasFiles)
+                //        {
+                //            string strFolder;
+                //            string strFilePath;
+                //            strFolder = Server.MapPath("~/InsiderTrading/emailAttachment/SendEmail/");
+                //            if (!Directory.Exists(strFolder))
+                //            {
+                //                Directory.CreateDirectory(strFolder);
+                //            }
+                //            foreach (HttpPostedFile uploadedFile in FileUpload1.PostedFiles)
+                //            {
+                //                strFilePath = strFolder + uploadedFile.FileName;
+                //                uploadedFile.SaveAs(strFilePath);
+                //                attachments.Add(strFilePath);
+                //            }
+                //        }
+
+                //        int CompanyId = int.Parse(HttpContext.Current.Session["CompanyId"].ToString());
+                //        var database = Convert.ToString(Session["ModuleDatabase"]);
+                //        var AdminDB = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
+
+                //        foreach (string sEmails in result)
+                //        {
+                //            EmailSender.SendMail(
+                //            sEmails, TextBoxSubject.Text, TextareaAppTemplate.Value.Replace("[UserId]", sEmails).ToString(),
+                //            attachments, "Custom Email", Convert.ToString(Session["CompanyId"]), bccUsers, null, Convert.ToString(Session["EmployeeId"])
+                //            );
+                //        }
+                //    }
+
+                //}
+                hdnEmailTask.Text = "Start";
+                Progress = null;
+                Progress.Add(new ProgressStep("Process Started", ProgressStatus.Started, "Process Started"));
+                Run run = new Run(SendCustomEmail);
+                IAsyncResult res = run.BeginInvoke((IAsyncResult ar) =>
+                {
+                    Progress.Add(new ProgressStep("Process Completed", ProgressStatus.Completed, "All emails sent"));
+                }, null);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){fnChkStatus();},0);", true);
+
+            }
+
+            catch (Exception ex)
+            {
+                LabelMsg.Text = ex.ToString();
+            }
+
+        }
+
+      
+        [WebMethod(EnableSession = true)]
+        public static string CheckDownload()
+        {
+            return HttpContext.Current.Session[sessionKey] == null ? string.Empty : ((Progress)HttpContext.Current.Session[sessionKey]).ToString();
+        }
+
+
+        public void SendCustomEmail()
         {
             try
             {
@@ -90,7 +237,6 @@ namespace ProcsDLL.InsiderTrading
                 }
                 else
                 {
-
                     string[] arrAllRole = selected.Split(new char[] { ',' });
                     string[] arrOtherEmailId = OtherEmailId.Split(new char[] { ',' });
                     if (OtherEmailId == "")
@@ -114,10 +260,16 @@ namespace ProcsDLL.InsiderTrading
                                 attachments.Add(strFilePath);
                             }
                         }
-
-                        int CompanyId = int.Parse(HttpContext.Current.Session["CompanyId"].ToString());
+                        int CompanyId = 0;                        
+                        if (HttpContext.Current != null && HttpContext.Current.Session != null && HttpContext.Current.Session["CompanyId"] != null)
+                        {
+                             CompanyId = int.Parse(HttpContext.Current.Session["CompanyId"].ToString());
+                        }
                         var database = Convert.ToString(Session["ModuleDatabase"]);
-                        var AdminDB = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
+                        if (HttpContext.Current != null && HttpContext.Current.Session != null && HttpContext.Current.Session["AdminDB"] != null)
+                        {
+                            var AdminDB = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
+                        }
 
                         foreach (string sEmails in result)
                         {
@@ -125,6 +277,7 @@ namespace ProcsDLL.InsiderTrading
                             sEmails, TextBoxSubject.Text, TextareaAppTemplate.Value.Replace("[UserId]", sEmails).ToString(),
                             attachments, "Custom Email", Convert.ToString(Session["CompanyId"]), bccUsers, null, Convert.ToString(Session["EmployeeId"])
                             );
+                            Progress.Add(new ProgressStep(string.Format("Notified to {0}", sEmails), ProgressStatus.InProgress));
                         }
                     }
                     else
@@ -149,9 +302,20 @@ namespace ProcsDLL.InsiderTrading
                             }
                         }
 
-                        int CompanyId = int.Parse(HttpContext.Current.Session["CompanyId"].ToString());
+                        int CompanyId = 0;
+                        if (HttpContext.Current != null && HttpContext.Current.Session != null && HttpContext.Current.Session["CompanyId"] != null)
+                        {
+                            CompanyId = int.Parse(HttpContext.Current.Session["CompanyId"].ToString());
+                        }
                         var database = Convert.ToString(Session["ModuleDatabase"]);
-                        var AdminDB = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
+                        if (HttpContext.Current != null && HttpContext.Current.Session != null && HttpContext.Current.Session["AdminDB"] != null)
+                        {
+                            var AdminDB = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
+                        }
+
+                        //int CompanyId = int.Parse(HttpContext.Current.Session["CompanyId"].ToString());
+                        //var database = Convert.ToString(Session["ModuleDatabase"]);
+                        //var AdminDB = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
 
                         foreach (string sEmails in result)
                         {
@@ -159,18 +323,17 @@ namespace ProcsDLL.InsiderTrading
                             sEmails, TextBoxSubject.Text, TextareaAppTemplate.Value.Replace("[UserId]", sEmails).ToString(),
                             attachments, "Custom Email", Convert.ToString(Session["CompanyId"]), bccUsers, null, Convert.ToString(Session["EmployeeId"])
                             );
+                            Progress.Add(new ProgressStep(string.Format("Notified to {0}", sEmails), ProgressStatus.InProgress));
                         }
                     }
-
-                }
-
+                }              
             }
-
             catch (Exception ex)
             {
                 LabelMsg.Text = ex.ToString();
             }
         }
+
         protected void GetUserList()
         {
 

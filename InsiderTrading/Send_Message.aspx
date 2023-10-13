@@ -14,7 +14,7 @@
 
     <link href="../assets/global/css/components.min.css" rel="stylesheet" type="text/css" />
     <link href="../assets/global/css/plugins.min.css" rel="stylesheet" type="text/css" />
-     <style>
+    <style>
         ul.tree, ul.tree * {
             list-style-type: none;
             margin: 0;
@@ -126,112 +126,124 @@
                         <h4 class="modal-title caption-subject bold uppercase font-red-sunglo">Send</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="javascript:fnClearTestMailForm();"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="portlet light bordered">
-                            <div class="portlet-body form">
-                                <div class="form-body">
-                                    <div class="form-group margin-bottom-10 clearfix" style="display:none">
-                                        <label>Login Id</label>
-                                        <asp:TextBox ID="TextBoxLoginId" CssClass="form-control" placeholder="enter comma seperated login id" runat="server"></asp:TextBox>
-                                        <small>Please enter 'All' or comma seperated 'login id' to send mail to active user</small><br />
 
-                                        <select id="ddlUsers" class="mt-multiselect btn btn-default" multiple data-placeholder="Select User(s)" data-label="left" data-select-all="true"
-                                            data-width="100%" data-filter="true" data-action-onchange="true" runat="server">
-                                        </select>
+                    <%--<form class="form-horizontal" runat="server" role="form" enctype="multipart/form-data">--%>
+                        <asp:ScriptManager ID="scriptManager1" runat="server"></asp:ScriptManager>
+                        <asp:UpdatePanel ID="updatepanel1" runat="server" UpdateMode="Conditional">
+                            <ContentTemplate>
+                                <asp:TextBox ID="hdnEmailTask" runat="server" style="display:none;" />
+                                <div class="modal-body">
+                                    <div class="portlet light bordered">
+                                        <div class="portlet-body form">
+                                            <div class="form-body">
+                                                <div class="form-group margin-bottom-10 clearfix" style="display: none">
+                                                    <label>Login Id</label>
+                                                    <asp:TextBox ID="TextBoxLoginId" CssClass="form-control" placeholder="enter comma seperated login id" runat="server"></asp:TextBox>
+                                                    <small>Please enter 'All' or comma seperated 'login id' to send mail to active user</small><br />
 
-                                        <%--<select id="bindUser" runat="server" class="mt-multiselect btn btn-default" 
+                                                    <select id="ddlUsers" class="mt-multiselect btn btn-default" multiple data-placeholder="Select User(s)" data-label="left" data-select-all="true"
+                                                        data-width="100%" data-filter="true" data-action-onchange="true" runat="server">
+                                                    </select>
+
+                                                    <%--<select id="bindUser" runat="server" class="mt-multiselect btn btn-default" 
                                             multiple data-placeholder="Select User(s)" data-label="left" data-select-all="true" 
                                             data-width="100%" data-filter="true" data-action-onchange="true">
                                         </select>--%>
-                                    </div>
-                                     <div class="form-group margin-bottom-10 clearfix">
-                                        <label>Other Email</label>
-                                        <asp:TextBox ID="TextOtherEmail" placeholder="enter comma seperated OtherEmail id" CssClass="form-control" runat="server"></asp:TextBox>
-                                    </div>
-                                    <div class="form-group">
-                                        <ul class="tree" style="margin-left: 10px;">
-                                            <li>
-                                                <input type="checkbox" id="chkRelatives" />
-                                                <label>Relatives</label>
-                                                <ul>
-                                                    <asp:DataList ID="Datalist1" runat="server" RepeatDirection="Vertical"
-                                                        RepeatLayout="Table">
-                                                        <ItemTemplate>
-                                                            <li>
-                                                                <input type="checkbox" class="cbCheck"  name="TreeSelect" value='<%#Eval("RELATIVE_EMAIL") %>' />
-                                                                <asp:Label ID="Itmnamelbl" Style="display: none" runat="server" Text='<%#Eval("RELATIVE_EMAIL") %>'></asp:Label>
-                                                                <asp:Label ID="Label6" runat="server" Text='<%#Eval("RELATIVE_NAME") %>'></asp:Label>
+                                                </div>
+                                                <div class="form-group margin-bottom-10 clearfix">
+                                                    <label>Other Email</label>
+                                                    <asp:TextBox ID="TextOtherEmail" placeholder="enter comma seperated OtherEmail id" CssClass="form-control" runat="server"></asp:TextBox>
+                                                </div>
+                                                <div class="form-group">
+                                                    <ul class="tree" style="margin-left: 10px;">
+                                                        <li>
+                                                            <input type="checkbox" id="chkRelatives" />
+                                                            <label>Relatives</label>
+                                                            <ul>
+                                                                <asp:DataList ID="Datalist1" runat="server" RepeatDirection="Vertical"
+                                                                    RepeatLayout="Table">
+                                                                    <ItemTemplate>
+                                                                        <li>
+                                                                            <input type="checkbox" class="cbCheck" name="TreeSelect" value='<%#Eval("RELATIVE_EMAIL") %>' />
+                                                                            <asp:Label ID="Itmnamelbl" Style="display: none" runat="server" Text='<%#Eval("RELATIVE_EMAIL") %>'></asp:Label>
+                                                                            <asp:Label ID="Label6" runat="server" Text='<%#Eval("RELATIVE_NAME") %>'></asp:Label>
 
-                                                            </li>
-                                                        </ItemTemplate>
-                                                    </asp:DataList>
-                                                </ul>
-                                            </li>
-                                            <li style="display:none">
-                                                <input type="checkbox" id="chkCP" />
-                                                <label>Connected persons</label>
-                                                <ul>
-                                                    <asp:DataList ID="ddlConnected" runat="server" RepeatDirection="Vertical"
-                                                        RepeatLayout="Table">
-                                                        <ItemTemplate>
-                                                            <li>
-                                                                <input type="checkbox" class="cbCheck"  name="TreeSelect" value='<%#Eval("CP_EMAIL") %>' />
-                                                                <asp:Label ID="Label5" Style="display: none" runat="server" Text='<%#Eval("CP_EMAIL") %>'></asp:Label>
-                                                                <asp:Label ID="Label6" runat="server" Text='<%#Eval("CP_NAME") %>'></asp:Label>
-                                                            </li>
-                                                        </ItemTemplate>
-                                                    </asp:DataList>
-                                                </ul>
-                                            </li>
-                                            <asp:DataList ID="ddlRole" runat="server" RepeatDirection="Vertical">
-                                                <ItemTemplate>
-                                                    <li>
-                                                        <input type="checkbox" />
-                                                        <asp:Label ID="Itmnamelbl1" runat="server" Text='<%#Eval("ROLE_NAME") %>'>
-                                                        </asp:Label>
-                                                        <ul>
-                                                            <asp:DataList ID="ddlCP" runat="server" RepeatDirection="Vertical">
-                                                                <ItemTemplate>
-                                                                    <li>
-                                                                        <input type="checkbox" class="cbCheck"  name="TreeSelect" value='<%#Eval("USER_EMAIL") %>' />
-                                                                        <asp:Label ID="Label1" Style="display: none" runat="server" Text='<%#Eval("USER_EMAIL") %>'>
-                                                                        </asp:Label>
-                                                                        <asp:Label ID="Label3" runat="server" Text='<%#Eval("USER_NM") %>'>
-                                                                        </asp:Label>
-                                                                    </li>
-                                                                </ItemTemplate>
-                                                            </asp:DataList>
-                                                             <asp:DataList ID="ddlConnected" runat="server" RepeatDirection="Vertical">
-                                                <ItemTemplate>
-                                                    <li>
-                                                        <input type="checkbox" class="cbCheck" value='<%#Eval("CP_EMAIL") %>' />
-                                                        <asp:Label ID="Label2" Style="display: none" runat="server" Text='<%#Eval("CP_EMAIL") %>'>
-                                                        </asp:Label>
-                                                        <asp:Label ID="Label4" runat="server" Text='<%#Eval("CP_NAME") %>'>
-                                                        </asp:Label>
-                                                    </li>
-                                                </ItemTemplate>
-                                            </asp:DataList>
-                                                        </ul>
-                                                    </li>
-                                                </ItemTemplate>
-                                            </asp:DataList>
-                                        </ul>
+                                                                        </li>
+                                                                    </ItemTemplate>
+                                                                </asp:DataList>
+                                                            </ul>
+                                                        </li>
+                                                        <li style="display: none">
+                                                            <input type="checkbox" id="chkCP" />
+                                                            <label>Connected persons</label>
+                                                            <ul>
+                                                                <asp:DataList ID="ddlConnected" runat="server" RepeatDirection="Vertical"
+                                                                    RepeatLayout="Table">
+                                                                    <ItemTemplate>
+                                                                        <li>
+                                                                            <input type="checkbox" class="cbCheck" name="TreeSelect" value='<%#Eval("CP_EMAIL") %>' />
+                                                                            <asp:Label ID="Label5" Style="display: none" runat="server" Text='<%#Eval("CP_EMAIL") %>'></asp:Label>
+                                                                            <asp:Label ID="Label6" runat="server" Text='<%#Eval("CP_NAME") %>'></asp:Label>
+                                                                        </li>
+                                                                    </ItemTemplate>
+                                                                </asp:DataList>
+                                                            </ul>
+                                                        </li>
+                                                        <asp:DataList ID="ddlRole" runat="server" RepeatDirection="Vertical">
+                                                            <ItemTemplate>
+                                                                <li>
+                                                                    <input type="checkbox" />
+                                                                    <asp:Label ID="Itmnamelbl1" runat="server" Text='<%#Eval("ROLE_NAME") %>'>
+                                                                    </asp:Label>
+                                                                    <ul>
+                                                                        <asp:DataList ID="ddlCP" runat="server" RepeatDirection="Vertical">
+                                                                            <ItemTemplate>
+                                                                                <li>
+                                                                                    <input type="checkbox" class="cbCheck" name="TreeSelect" value='<%#Eval("USER_EMAIL") %>' />
+                                                                                    <asp:Label ID="Label1" Style="display: none" runat="server" Text='<%#Eval("USER_EMAIL") %>'>
+                                                                                    </asp:Label>
+                                                                                    <asp:Label ID="Label3" runat="server" Text='<%#Eval("USER_NM") %>'>
+                                                                                    </asp:Label>
+                                                                                </li>
+                                                                            </ItemTemplate>
+                                                                        </asp:DataList>
+                                                                        <asp:DataList ID="ddlConnected" runat="server" RepeatDirection="Vertical">
+                                                                            <ItemTemplate>
+                                                                                <li>
+                                                                                    <input type="checkbox" class="cbCheck" value='<%#Eval("CP_EMAIL") %>' />
+                                                                                    <asp:Label ID="Label2" Style="display: none" runat="server" Text='<%#Eval("CP_EMAIL") %>'>
+                                                                                    </asp:Label>
+                                                                                    <asp:Label ID="Label4" runat="server" Text='<%#Eval("CP_NAME") %>'>
+                                                                                    </asp:Label>
+                                                                                </li>
+                                                                            </ItemTemplate>
+                                                                        </asp:DataList>
+                                                                    </ul>
+                                                                </li>
+                                                            </ItemTemplate>
+                                                        </asp:DataList>
+                                                    </ul>
+                                                </div>
+
+
+                                                <div class="form-group margin-bottom-10 clearfix">
+                                                    <label>BCC Email</label>
+                                                    <asp:TextBox ID="TextBoxBccEmail" CssClass="form-control" runat="server"></asp:TextBox>
+                                                    <asp:TextBox ID="txtSelectedUsers" CssClass="form-control" runat="server" Style="display: none;"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-
-
-                                    <div class="form-group margin-bottom-10 clearfix">
-                                        <label>BCC Email</label>
-                                        <asp:TextBox ID="TextBoxBccEmail" CssClass="form-control" runat="server"></asp:TextBox>
-                                        <asp:TextBox ID="txtSelectedUsers" CssClass="form-control" runat="server" Style="display: none;"></asp:TextBox>
+                                    <div class="form-actions text-right">
+                                        <asp:Button ID="ButtonSend" CssClass="btn blue" runat="server" Text="Send" OnClick="ButtonSend_OnClick" OnClientClick="javascript:fnloader()" />
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="form-actions text-right">
-                            <asp:Button ID="ButtonSend" CssClass="btn blue" runat="server" Text="Send" OnClick="ButtonSend_OnClick" OnClientClick="javascript:fnloader()" />
-                        </div>
-                    </div>
+                            </ContentTemplate>
+                            <Triggers>
+                                <asp:PostBackTrigger ControlID="ButtonSend" />
+                            </Triggers>
+                        </asp:UpdatePanel>
+                 <%--   </form>--%>
                 </div>
             </div>
         </div>
@@ -382,6 +394,79 @@
 
             });
         });
+
+
+        var downloadComplete = false;
+        var intervalListener;
+
+        var start = $("input[id*=hdnEmailTask]").val();
+        if (start == "Start") {
+            $("#LoaderProgerss").show();
+            intervalListener = window.setInterval(function () {
+                if (!downloadComplete) {
+                    CallCheckEmailStatus();
+                }
+            }, 2000);
+        }
+        else if (start == "NullbyteFileError") {
+            alert("Uploaded document contains nullbyte, please correct the name and try again.");
+        }
+        else if (start == "FileError") {
+            alert("Please upload only pdf format");
+            }
+
+
+        function fnChkStatus() {
+            debugger;
+            var start = $("input[id*=hdnEmailTask]").val();
+            if (start == "Start") {
+                $("#LoaderProgerss").show();
+                intervalListener = window.setInterval(function () {
+                    if (!downloadComplete) {
+                        CallCheckEmailStatus();
+                    }
+                }, 2000);
+            }
+        }
+        function CallCheckEmailStatus() {
+            debugger;
+            $.ajax({
+                type: "POST",
+                url: "Send_Message.aspx/CheckDownload",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (r) {
+                    updateStatus('completed', r.d);
+                    if (r.d.indexOf('All emails sent') > -1) {
+                        downloadComplete = true;
+                    }
+                },
+                error: function (r) {
+                    console.log('Check error : ' + r);
+                },
+                failure: function (r) {
+                    console.log('Check failure : ' + r);
+                }
+            });
+            if (downloadComplete) {
+                window.clearInterval(intervalListener);
+                $("input[id*=hdnEmailTask]").val('');
+                $("#LoaderProgerss").hide();
+            }
+        }
+        function updateStatus(status, msg) {
+            debugger;
+            document.getElementById('lblMsg').innerHTML = msg;
+            if (msg.indexOf('All emails sent') > -1) {
+                downloadComplete = true;
+                window.clearInterval(intervalListener);
+                $("input[id*=hdnEmailTask]").val('');
+                $("#LoaderProgerss").hide();
+                alert("Custom Email notification sent successfully");
+            }
+        }
+
+
     </script>
 </asp:Content>
 
