@@ -482,18 +482,19 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     objSessionResponse.Msg = "SessionExpired";
                     return objSessionResponse;
                 }
-                String input = HttpContext.Current.Request.Form["Object"];
+
+                string input;
+                using (System.IO.StreamReader sr = new System.IO.StreamReader(HttpContext.Current.Request.InputStream))
+                {
+                    input = sr.ReadToEnd();
+                }
                 System.Web.Script.Serialization.JavaScriptSerializer serializer1 = new System.Web.Script.Serialization.JavaScriptSerializer();
                 UserResponse UserRes = new UserResponse();
-                List<User> lstUser = new List<User>();
-                lstUser = serializer1.Deserialize<List<User>>(input);
-                if (lstUser == null)
-                {
-                    UserRes.StatusFl = false;
-                    UserRes.Msg = "Something went wrong";
-                    return UserRes;
-                }
-                else if (lstUser.Count == 0)
+                //List<User> lstUser = new List<User>();
+                //lstUser = serializer1.Deserialize<List<User>>(input);
+
+                User objUser = serializer1.Deserialize<User>(input);
+                if (objUser == null)
                 {
                     UserRes.StatusFl = false;
                     UserRes.Msg = "Something went wrong";
@@ -501,59 +502,25 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 }
                 else
                 {
-                    User objUser = new User();
-                    objUser = lstUser[0];
                     objUser.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
                     objUser.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
                     objUser.ADMIN_DATABASE = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
                     objUser.moduleId = Convert.ToInt32(HttpContext.Current.Session["ModuleId"]);
-
-                    if (HttpContext.Current.Request.Files.Count > 0)
+                    
+                    if (objUser.ValidateInput())
                     {
-                        String sSaveAs = "";
-                        String userDir = "/InsiderTrading/images/user/";
-
-                        if (!Directory.Exists(HttpContext.Current.Server.MapPath("~" + userDir)))
-                        {
-                            Directory.CreateDirectory(HttpContext.Current.Server.MapPath("~" + userDir));
-                        }
-
-                        System.Security.AccessControl.DirectorySecurity sec = Directory.GetAccessControl(HttpContext.Current.Server.MapPath("~" + userDir));
-                        // Using this instead of the "Everyone" string means we work on non-English systems.
-                        System.Security.Principal.SecurityIdentifier everyone = new System.Security.Principal.SecurityIdentifier(System.Security.Principal.WellKnownSidType.WorldSid, null);
-                        sec.AddAccessRule(new System.Security.AccessControl.FileSystemAccessRule(everyone, System.Security.AccessControl.FileSystemRights.FullControl, System.Security.AccessControl.InheritanceFlags.ContainerInherit | System.Security.AccessControl.InheritanceFlags.ObjectInherit, System.Security.AccessControl.PropagationFlags.None, System.Security.AccessControl.AccessControlType.Allow));
-                        Directory.SetAccessControl(HttpContext.Current.Server.MapPath("~" + userDir), sec);
-
-                        HttpFileCollection files = HttpContext.Current.Request.Files;
-                        String newFileName = String.Empty;
-                        for (int i = 0; i < files.Count; i++)
-                        {
-                            HttpPostedFile file = files[i];
-                            String ext = Path.GetExtension(file.FileName);
-                            String name = Path.GetFileNameWithoutExtension(file.FileName);
-                            if (HttpContext.Current.Request.Browser.Browser.ToUpper() == "IE" || HttpContext.Current.Request.Browser.Browser.ToUpper() == "INTERNETEXPLORER")
-                            {
-                                string[] testfiles = file.FileName.Split(new char[] { '\\' });
-                                newFileName = testfiles[testfiles.Length - 1] + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            }
-                            else
-                            {
-                                newFileName = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            }
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + userDir), newFileName);
-                            file.SaveAs(sSaveAs);
-                            objUser.uploadAvatar = newFileName;
-                        }
+                        UserRequest UserReq = new UserRequest(objUser);
+                        UserRes = new UserResponse();
+                        UserRes = UserReq.SaveUser();
+                        return UserRes;
                     }
                     else
                     {
-                        objUser.uploadAvatar = "Unknown.png";
+                        UserRes = new UserResponse();
+                        UserRes.StatusFl = false;
+                        UserRes.Msg = sXSSErrMsg;
+                        return UserRes;
                     }
-
-                    UserRequest UserReq = new UserRequest(objUser);
-                    UserRes = new UserResponse();
-                    UserRes = UserReq.SaveUser();
-                    return UserRes;
                 }
             }
             catch (Exception ex)
@@ -772,9 +739,6 @@ namespace ProcsDLL.Controllers.InsiderTrading
                         return objResponse;
                     }
                 }
-
-
-
 
                 DepositoryRequest cReq = new DepositoryRequest(depository);
                 DepositoryResponse cRes = cReq.SaveThresholdLimitAndByTime();

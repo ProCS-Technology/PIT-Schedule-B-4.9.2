@@ -497,7 +497,41 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 if (files.Count > 1)
                 {
                     HttpPostedFile zipFile = files[1];
-                    zipFileNameToAppend = Path.GetFileNameWithoutExtension(zipFile.FileName) + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture);
+                    //zipFileNameToAppend = Path.GetFileNameWithoutExtension(zipFile.FileName) + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture);
+                    string sNm = Path.GetFileNameWithoutExtension(zipFile.FileName);
+                    string ext = Path.GetExtension(zipFile.FileName);
+
+                    if (sNm.Contains("%00"))
+                    {
+                        UPSIResponse objResponse1 = new UPSIResponse();
+                        objResponse1.StatusFl = false;
+                        objResponse1.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                        return objResponse1;
+                    }
+                    if (ext.ToLower() == ".zip")
+                    {
+                        String nameX = "UPSIAttachment_";
+                        string newFileName = nameX + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                        sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + uploadDir), newFileName);
+                        zipFile.SaveAs(sSaveAs);
+
+                        using (ZipArchive archive = ZipFile.Open(zipFileSaveAs, ZipArchiveMode.Read))
+                        {
+                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            {
+                                entry.ExtractToFile(Path.Combine(HttpContext.Current.Server.MapPath("~" + uploadDir + "/" + zipFileNameToAppend + "/"), entry.Name), true);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        UPSIResponse objResponse1 = new UPSIResponse();
+                        objResponse1.StatusFl = false;
+                        objResponse1.Msg = "Only Zip attachement is allowed";
+                        return objResponse1;
+                    }
+                    /*
+                     zipFileNameToAppend = "UPSIAttachment_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture);
                     newZipFileName = zipFileNameToAppend + "." + zipFile.FileName.Split('.')[1];
                     zipFileSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + uploadDir), newZipFileName);
                     zipFile.SaveAs(zipFileSaveAs);
@@ -511,6 +545,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
                         }
                     }
                     File.Delete(zipFileSaveAs);
+                    */
                 }
 
                 if (files.Count > 0)
@@ -519,28 +554,46 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     {
                         HttpPostedFile file = files[i];
                         String ext = Path.GetExtension(file.FileName);
-                        String name = Path.GetFileNameWithoutExtension(file.FileName);
+                        string sNm = Path.GetFileNameWithoutExtension(file.FileName);
+                        String name = "UPSITemplate_";
 
-                        if (HttpContext.Current.Request.Browser.Browser.ToUpper() == "IE" || HttpContext.Current.Request.Browser.Browser.ToUpper() == "INTERNETEXPLORER")
+                        if (sNm.Contains("%00"))
                         {
-                            string[] testfiles = file.FileName.Split(new char[] { '\\' });
-                            fname = testfiles[testfiles.Length - 1] + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                            UPSIResponse objResponse = new UPSIResponse();
+                            objResponse.StatusFl = false;
+                            objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                            return objResponse;
                         }
-                        else
-                        {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                        }
+
                         if (i == 0)
                         {
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + uploadDir), fname);
-                            file.SaveAs(sSaveAs);
-                            rel.UPSITemplate = fname;
-                        }
-                        else
-                        {
-                            // sSaveAs1 = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UPSI/"), fname);
-                            //file.SaveAs(sSaveAs1);
-                            //rel.fileNameESOP = fname;
+                            int cLength = file.ContentLength;
+                            string sContentTyp = file.ContentType;
+
+                            if (sContentTyp.ToUpper() == "APPLICATION/VND.MS-EXCEL" || sContentTyp.ToUpper() == "APPLICATION/VND.OPENXMLFORMATS-OFFICEDOCUMENT.SPREADSHEETML.SHEET")
+                            {
+                                if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                                {
+                                    fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                    sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + uploadDir), fname);
+                                    file.SaveAs(sSaveAs);
+                                    rel.UPSITemplate = fname;
+                                }
+                                else
+                                {
+                                    UPSIResponse objResponse = new UPSIResponse();
+                                    objResponse.StatusFl = false;
+                                    objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                                    return objResponse;
+                                }
+                            }
+                            else
+                            {
+                                UPSIResponse objResponse = new UPSIResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Content type of the uploaded document does not matched with the permissible document";
+                                return objResponse;
+                            }
                         }
                     }
                 }

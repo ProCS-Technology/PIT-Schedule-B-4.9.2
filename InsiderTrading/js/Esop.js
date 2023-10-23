@@ -76,7 +76,8 @@ function fnGetAllEsopHdr() {
                     str += '<td>' + msg.BenposHeaderList[index].restrictedCompany.companyName + '</td>';
                     str += '<td>' + msg.BenposHeaderList[index].asOfDate + '</td>';
                     //str += '<td style="display:none">' + msg.BenposHeaderList[index].fileName + '</td>';
-                    str += '<td><a class="fa fa-download" target="_blank" href="Benpos/' + msg.BenposHeaderList[index].fileName + '"></a></td>';
+                    str += '<td><a class="fa fa-download" onclick=\'javascript:fnDownloadESOP("' + msg.BenposHeaderList[index].id + '");\'></a></td>';
+                    //str += '<td><a class="fa fa-download" target="_blank" href="Benpos/' + msg.BenposHeaderList[index].fileName + '"></a></td>';
                     str += '</tr>';
                 }
 
@@ -91,6 +92,29 @@ function fnGetAllEsopHdr() {
             alert(error.status + ' ' + error.statusText);
         }
     })
+}
+function fnDownloadESOP(EsopId) {
+    var webUrl = uri + "/api/Benpos/GetESOPFile?EsopId=" + EsopId;
+    $.ajax({
+        url: webUrl,
+        type: 'GET',
+        headers: {
+            Accept: "application/vnd.ms-excel; base64",
+        },
+        success: function (data) {
+            var uri = 'data:application/vnd.ms-excel;base64,' + data;
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = "ExcelReport.xlsx";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function () {
+            console.log('error Occured while Downloading CSV file.');
+        },
+    });
 }
 function fnSubmitEsopFile() {
     if (fnValidateEsopHdr()) {
@@ -134,6 +158,7 @@ function fnAddUpdateEsopHdr() {
     $("#Loader").show();
     var filesData = new FormData();
     var documentESOP = $("#fileUploadImageESOP").get(0).files[0].name;
+    var documentSize = $("#fileUploadImageESOP").get(0).files[0].size;
     var restrictedCompany = $("#ddlRestrictedCompanies").val().trim();
     var corporateaction = $("#ddlCorporateAction option:selected").text();
 
@@ -143,6 +168,7 @@ function fnAddUpdateEsopHdr() {
     }));
 
     filesData.append("FilesESOP", $("#fileUploadImageESOP").get(0).files[0]);
+    filesData.append("FileSize", documentSize);
     var webUrl = uri + "/api/Benpos/SaveEsopHdr";
     $.ajax({
         type: 'POST',

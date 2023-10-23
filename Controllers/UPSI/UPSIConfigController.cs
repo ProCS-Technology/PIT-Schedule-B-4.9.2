@@ -13,6 +13,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
 {
     public class UPSIConfigController : ApiController
     {
+        string sXSSErrMsg = Convert.ToString(ConfigurationManager.AppSettings["XSSErrMsg"]);
         [Route("GetUPSIConfig")]
         [HttpGet]
         public UPSIConfigResponse GetUPSIConfig()
@@ -40,7 +41,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSIConfigResponse upsiRes = new UPSIConfigResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
 
@@ -80,7 +81,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSIEmailConfigResponse upsiRes = new UPSIEmailConfigResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
 
@@ -125,7 +126,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSIConfigResponse upsiRes = new UPSIConfigResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
 
@@ -234,7 +235,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSIEmailConfigResponse upsiRes = new UPSIEmailConfigResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
             }
@@ -278,7 +279,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSIEmailConfigResponse upsiRes = new UPSIEmailConfigResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
             }
@@ -322,7 +323,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSITypeResponse upsiRes = new UPSITypeResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
             }
@@ -361,7 +362,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSITypeResponse upsiRes = new UPSITypeResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
 
@@ -407,7 +408,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSIEmailConfigResponse upsiRes = new UPSIEmailConfigResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
             }
@@ -451,7 +452,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSITypeResponse upsiRes = new UPSITypeResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
 
@@ -584,7 +585,7 @@ namespace ProcsDLL.Controllers.UPSIConfig
                 {
                     UPSIEmailConfigResponse upsiRes = new UPSIEmailConfigResponse();
                     upsiRes.StatusFl = false;
-                    upsiRes.Msg = "Invalid input format.";
+                    upsiRes.Msg = sXSSErrMsg;
                     return upsiRes;
                 }
             }
@@ -621,9 +622,19 @@ namespace ProcsDLL.Controllers.UPSIConfig
                     businessUnitName = Convert.ToString(HttpContext.Current.Session["BusinessUnitName"])
                 };
 
-                UserRequest gReqUserList = new UserRequest(objUser);
-                GenericResponse gResUserList = gReqUserList.GetAllUsers();
-                return gResUserList;
+                if (objUser.ValidateInput())
+                {
+                    UserRequest gReqUserList = new UserRequest(objUser);
+                    GenericResponse gResUserList = gReqUserList.GetAllUsers();
+                    return gResUserList;
+                }
+                else
+                {
+                    GenericResponse upsiRes = new GenericResponse();
+                    upsiRes.StatusFl = false;
+                    upsiRes.Msg = sXSSErrMsg;
+                    return upsiRes;
+                }
             }
             catch (Exception ex)
             {

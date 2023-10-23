@@ -1043,6 +1043,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
 
                 String sSaveAs = HttpContext.Current.Request.Form["sSaveAs"];
                 String sGrpId = HttpContext.Current.Request.Form["GrpId"];
+                String sFileSize = HttpContext.Current.Request.Form["FileSize"];
                 String sSaveAs1="";
                 string UserLogin = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
                 string sAdminDb = Convert.ToString(HttpContext.Current.Session["AdminDb"]);
@@ -1053,23 +1054,42 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     for (int i = 0; i < files.Count; i++)
                     {
                         HttpPostedFile file = files[i];
+                        int cLength = file.ContentLength;
                         String ext = Path.GetExtension(file.FileName);
                         string sNm = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "UPSICommunication_";
                         string fname;
 
-                        if (sNm.Contains("%00"))
+                        string sContentTyp = file.ContentType;
+                        if (sContentTyp.ToUpper() == "APPLICATION/VND.MS-EXCEL" || sContentTyp.ToUpper() == "APPLICATION/VND.OPENXMLFORMATS-OFFICEDOCUMENT.SPREADSHEETML.SHEET")
                         {
-                            UPSIGroupResponse objResponseX = new UPSIGroupResponse();
-                            objResponseX.StatusFl = false;
-                            objResponseX.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
-                            return objResponseX;
+                            if (sFileSize != cLength.ToString())
+                            {
+                                UPSIGroupResponse objResponseXY = new UPSIGroupResponse();
+                                objResponseXY.StatusFl = false;
+                                objResponseXY.Msg = "Uploaded document is corrupt, please upload correct the one.";
+                                return objResponseXY;
+                            }
+                            if (sNm.Contains("%00"))
+                            {
+                                UPSIGroupResponse objResponseX = new UPSIGroupResponse();
+                                objResponseX.StatusFl = false;
+                                objResponseX.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                                return objResponseX;
+                            }
+                            if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                            {
+                                fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UPSI/"), fname);
+                                file.SaveAs(sSaveAs);
+                            }
                         }
-                        if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                        else
                         {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UPSI/"), fname);
-                            file.SaveAs(sSaveAs);
+                            UPSIGroupResponse objResponseXX = new UPSIGroupResponse();
+                            objResponseXX.StatusFl = false;
+                            objResponseXX.Msg = "Content type of the uploaded document does not matched with the permissible document";
+                            return objResponseXX;
                         }
                     }
                     if (!String.IsNullOrEmpty(sSaveAs))
@@ -1336,6 +1356,14 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 upsiGrp.CompanyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
                 upsiGrp.CreatedBy = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
                 upsiGrp.ADMIN_DATABASE = Convert.ToString(HttpContext.Current.Session["AdminDb"]);
+
+                if (!upsiGrp.ValidateInput())
+                {
+                    upsiRes = new UPSIGroupResponse();
+                    upsiRes.Msg = sXSSErrMsg;
+                    upsiRes.StatusFl = false;
+                    return upsiRes;
+                }
 
                 UPSIGroupRequest grpRequest = new UPSIGroupRequest(upsiGrp);
                 upsiRes = grpRequest.AddUPSITaskDP();

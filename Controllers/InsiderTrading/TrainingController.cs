@@ -1,5 +1,4 @@
-﻿
-using ProcsDLL.Models.Infrastructure;
+﻿using ProcsDLL.Models.Infrastructure;
 using ProcsDLL.Models.InsiderTrading.Model;
 using ProcsDLL.Models.InsiderTrading.Service.Request;
 using ProcsDLL.Models.InsiderTrading.Service.Response;

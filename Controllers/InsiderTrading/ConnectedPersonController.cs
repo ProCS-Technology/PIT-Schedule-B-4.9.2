@@ -277,36 +277,54 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 }
                 String sSaveAs = String.Empty;
                 String sUser = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-
+                String sFileSize = HttpContext.Current.Request.Form["FileSize"];
                 if (HttpContext.Current.Request.Files.Count > 0)
                 {
                     HttpFileCollection files = HttpContext.Current.Request.Files;
                     for (int i = 0; i < files.Count; i++)
                     {
                         HttpPostedFile file = files[i];
+                        int cLength = file.ContentLength;
                         String ext = Path.GetExtension(file.FileName);
                         string sNm = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "ConnectedPerson_";
                         string fname;
-
-                        if (sNm.Contains("%00"))
+                        string sContentTyp = file.ContentType;
+                        if (sContentTyp.ToUpper() == "APPLICATION/VND.MS-EXCEL" || sContentTyp.ToUpper() == "APPLICATION/VND.OPENXMLFORMATS-OFFICEDOCUMENT.SPREADSHEETML.SHEET")
                         {
-                            CPResponse objResponse = new CPResponse();
-                            objResponse.StatusFl = false;
-                            objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
-                            return objResponse;
-                        }
-                        if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
-                        {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), fname);
-                            file.SaveAs(sSaveAs);
+                            if (sFileSize != cLength.ToString())
+                            {
+                                CPResponse objResponse = new CPResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document is corrupt, please upload correct the one.";
+                                return objResponse;
+                            }
+                            if (sNm.Contains("%00"))
+                            {
+                                CPResponse objResponse = new CPResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                                return objResponse;
+                            }
+                            if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                            {
+                                fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), fname);
+                                file.SaveAs(sSaveAs);
+                            }
+                            else
+                            {
+                                CPResponse objResponse = new CPResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                                return objResponse;
+                            }
                         }
                         else
                         {
                             CPResponse objResponse = new CPResponse();
                             objResponse.StatusFl = false;
-                            objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                            objResponse.Msg = "Content type of the uploaded document does not matched with the permissible document";
                             return objResponse;
                         }
                     }
@@ -316,7 +334,6 @@ namespace ProcsDLL.Controllers.InsiderTrading
                         string extension = Path.GetExtension(sSaveAs);
                         string Excel03ConString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + sSaveAs + ";Extended Properties='Excel 8.0;HDR=Yes;IMEX=1;'";
                         string Excel07ConString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + sSaveAs + ";Extended Properties='Excel 8.0;HDR=Yes;IMEX=1;'";
-
                         string conString = "";
 
                         switch (extension)

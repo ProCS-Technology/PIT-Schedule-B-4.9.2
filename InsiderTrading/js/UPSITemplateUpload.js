@@ -7,6 +7,7 @@ function fnUploadUPSITemplate() {
     var isValid = true;
     var txtExcelDoc = $("input[id*='txtExcelDoc']").get(0);
     var excelFile = txtExcelDoc.files;
+    var documentSize = $("input[id*='txtExcelDoc']").get(0).files[0].size;
     if (excelFile.length == 0) {
         $("#lblExcel").addClass('required-red');
         isValid = false;
@@ -23,7 +24,24 @@ function fnUploadUPSITemplate() {
         else {
             $("#lblExcel").removeClass('required-red');
         }
-        
+    }
+
+    var txtZipDoc = $("input[id*='txtZipDoc']").get(0);
+    var zipFile = txtZipDoc.files;
+    if (excelFile.length == 0) {}
+    else {
+        var itemFile = $("#txtZipDoc").get(0).files;
+        var arrayZipExtension = ["zip"];
+        if (itemFile.length > 0) {
+            if ($.inArray(itemFile[0].name.split('.').pop().toLowerCase(), arrayZipExtension) == -1) {
+                isValid = false;
+                alert("Only zip format is allowed.");
+                $("#lblZip").addClass('required-red');
+            }
+            else {
+                $("#lblZip").removeClass('required-red');
+            }
+        }
     }
     if (!isValid) {
         return false;
@@ -33,6 +51,7 @@ function fnUploadUPSITemplate() {
     var filesData = new FormData();
     filesData.append("Excel", $("input[id*='txtExcelDoc']").get(0).files[0]);
     filesData.append("Zip", $("input[id*='txtZipDoc']").get(0).files[0]);
+    filesData.append("FileSize", documentSize);
 
     var webUrl = uri + "/api/UPSI/SaveUPSITemplate";
     $.ajax({

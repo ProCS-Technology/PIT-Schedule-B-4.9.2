@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using ProcsDLL.Models.InsiderTrading.Model;
+using ProcsDLL.Models.InsiderTrading.Service.Request;
+using ProcsDLL.Models.InsiderTrading.Service.Response;
+using Newtonsoft.Json;
 using Syncfusion.EJ.PdfViewer;
 using System;
 using System.Collections.Generic;
@@ -17,53 +20,21 @@ namespace ProcsDLL.Controllers.InsiderTrading
             try
             {
                 PdfViewerHelper helper = new PdfViewerHelper();
-                if (jsonResult.ContainsKey("newFileName"))
+
+                Policy pol = new Policy();
+                pol.CREATED_BY = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
+                pol.COMPANY_ID = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                pol.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
+                PolicyRequest PolicyList = new PolicyRequest(pol);
+                PolicyResponse gResPolList = PolicyList.GetPolicyList();
+
+                if (gResPolList.StatusFl)
                 {
-                    var name = jsonResult["newFileName"];
-                    string fileName = name.Split(new string[] { "://" }, StringSplitOptions.None)[0];
-                    if (fileName == "http" || fileName == "https")
+                    string sPolicy = Path.Combine(HttpContext.Current.Server.MapPath("~/assets/logos/Policy/"), gResPolList.PolicyList[0].DOCUMENT);
+                    if (File.Exists(sPolicy))
                     {
-                        var WebClient = new WebClient();
-                        byte[] pdfDoc = WebClient.DownloadData(name);
+                        byte[] pdfDoc = File.ReadAllBytes(sPolicy);
                         helper.Load(pdfDoc);
-                    }
-                    else
-                    {
-                        if (name.Contains("/video/"))
-                        {
-                            helper.Load("~" + name);
-                        }
-                        else
-                        {
-                            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(name);
-                            string path = HttpContext.Current.Server.MapPath("~/assets/logos/Policy/" + fileNameWithoutExt + ".pdf");
-                            helper.Load(path);
-                        }
-                    }
-                }
-                else
-                {
-                    if (jsonResult.ContainsKey("isInitialLoading"))
-                    {
-                        if (jsonResult.ContainsKey("file"))
-                        {
-                            var name = jsonResult["file"];
-                            string fileName = name.Split(new string[] { "://" }, StringSplitOptions.None)[0];
-                            if (fileName == "http" || fileName == "https")
-                            {
-                                var WebClient = new WebClient();
-                                byte[] pdfDoc = WebClient.DownloadData(name);
-                                helper.Load(pdfDoc);
-                            }
-                            else
-                            {
-                                helper.Load("~" + name);
-                            }
-                        }
-                        else
-                        {
-                            helper.Load(HttpContext.Current.Server.MapPath("~/assets/logos/Policy/HTTP Succinctly.pdf"));
-                        }
                     }
                 }
                 return JsonConvert.SerializeObject(helper.ProcessPdf(jsonResult));
@@ -73,6 +44,69 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 return Convert.ToString(ex.Message);
             }
         }
+        //[Route("Load")]
+        //[HttpPost]
+        //public object Load(Dictionary<string, string> jsonResult)
+        //{
+        //    try
+        //    {
+        //        PdfViewerHelper helper = new PdfViewerHelper();
+        //        if (jsonResult.ContainsKey("newFileName"))
+        //        {
+        //            var name = jsonResult["newFileName"];
+        //            string fileName = name.Split(new string[] { "://" }, StringSplitOptions.None)[0];
+        //            if (fileName == "http" || fileName == "https")
+        //            {
+        //                var WebClient = new WebClient();
+        //                byte[] pdfDoc = WebClient.DownloadData(name);
+        //                helper.Load(pdfDoc);
+        //            }
+        //            else
+        //            {
+        //                if (name.Contains("/video/"))
+        //                {
+        //                    helper.Load("~" + name);
+        //                }
+        //                else
+        //                {
+        //                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(name);
+        //                    string path = HttpContext.Current.Server.MapPath("~/assets/logos/Policy/" + fileNameWithoutExt + ".pdf");
+        //                    helper.Load(path);
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (jsonResult.ContainsKey("isInitialLoading"))
+        //            {
+        //                if (jsonResult.ContainsKey("file"))
+        //                {
+        //                    var name = jsonResult["file"];
+        //                    string fileName = name.Split(new string[] { "://" }, StringSplitOptions.None)[0];
+        //                    if (fileName == "http" || fileName == "https")
+        //                    {
+        //                        var WebClient = new WebClient();
+        //                        byte[] pdfDoc = WebClient.DownloadData(name);
+        //                        helper.Load(pdfDoc);
+        //                    }
+        //                    else
+        //                    {
+        //                        helper.Load("~" + name);
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    helper.Load(HttpContext.Current.Server.MapPath("~/assets/logos/Policy/HTTP Succinctly.pdf"));
+        //                }
+        //            }
+        //        }
+        //        return JsonConvert.SerializeObject(helper.ProcessPdf(jsonResult));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Convert.ToString(ex.Message);
+        //    }
+        //}
         [Route("GetDocument")]
         [HttpGet]
         public string GetDocument()

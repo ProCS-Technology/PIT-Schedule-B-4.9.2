@@ -96,6 +96,16 @@ $(document).ready(function () {
         clearBtn: true,
         endDate: "today"        
     }).val(FormatDate(GetCurrentDt(), $("input[id*=hdnDateFormat]").val())).attr('readonly', 'readonly');
+
+    $("#txtDateOfJoining").on('change', function () {
+        //alert($("#txtDateOfJoining").val());
+        $("#hdnDateOfJoining").val(convertToDateTime($("#txtDateOfJoining").val()));
+    });
+    $("#txtDateOfBecomingInsider").on('change', function () {
+        //alert($("#txtDateOfJoining").val());
+        $("#hdnDateOfBecomingInsider").val(convertToDateTime($("#txtDateOfBecomingInsider").val()));
+    });
+
     $('#txtDateOfRetirement').datepicker({
         todayHighlight: true,
         autoclose: true,
@@ -148,6 +158,8 @@ function fnCloseAdUserPopUp() {
     window.location.reload(true);
 }
 function btnSearch_Click() {
+    //function to search user from AD 
+    //Added by Sandeep on 30/09/2023 for fixing the bug in release 4.9.1
     $("#Loader").show();
     var webUrl = uri + "/api/UserIT/SerchByName?UserName=" + $("#txtUserName").val();
     if ($("#isSearchUsersFromLocalServer").prop("checked")) {
@@ -390,17 +402,18 @@ function fnGetUserList() {
         success: function (msg) {
             if (msg.StatusFl == true) {
                 var result = "";
-                //alert("Format=" + $("input[id*=hdnDateFormat]").val());
-
                 for (var i = 0; i < msg.UserList.length; i++) {
                     if (msg.UserList[i].status == "Active") {
-                        //alert("msg.UserList[" + i + "].tenureEndDate=" + msg.UserList[i].tenureEndDate);
-                        //alert("msg.UserList[" + i + "].becomingInsiderDate=" + msg.UserList[i].becomingInsiderDate);
-                        //alert("msg.UserList[" + i + "].joiningDate=" + msg.UserList[i].joiningDate);
-
+                        var strEmail = "";
+                        if (msg.UserList[i].Emails != null) {
+                            for (var j = 0; j < msg.UserList[i].Emails.length; j++) {
+                                strEmail += msg.UserList[i].Emails[j] + ";";
+                            }
+                        }
+                        //alert(strEmail);
                         result += '<tr id="tr_' + msg.UserList[i].ID + '">';
                         result += '<td id="tdedit_' + msg.UserList[i].LOGIN_ID + '">';
-                        result += '<a data-target="#userModel" data-toggle="modal" id="a' + msg.UserList[i].LOGIN_ID + '" class="btn btn-outline dark" onclick=\"javascript:fnEditUser(\'' + msg.UserList[i].LOGIN_ID + '\',\'' + msg.UserList[i].USER_NM + '\',\'' + msg.UserList[i].USER_EMAIL + '\',\'' + msg.UserList[i].USER_MOBILE + '\',\'' + msg.UserList[i].panNumber + '\',\'' + msg.UserList[i].userRole.ROLE_ID + '\',\'' + msg.UserList[i].nationality + '\',\'' + msg.UserList[i].USER_PWD + '\',\'' + msg.UserList[i].status + '\',\'' + msg.UserList[i].uploadAvatar + '\',\'' + msg.UserList[i].SALUTATION + '\',\'' + msg.UserList[i].designation.DESIGNATION_ID + '\',\'' + msg.UserList[i].department.DEPARTMENT_ID + '\',\'' + msg.UserList[i].businessUnit.businessUnitId + '\',\'' + FormatDate(msg.UserList[i].tenureEndDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].PersonalEmail + '\',\'' + msg.UserList[i].UserType + '\',\'' + FormatDate(msg.UserList[i].becomingInsiderDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].CategoryId + '\',\'' + msg.UserList[i].employeeId + '\',\'' + FormatDate(msg.UserList[i].joiningDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].ID + '\',\'' + msg.UserList[i].identificationType + '\',\'' + msg.UserList[i].identificationNumber + '\');\">Edit</a>';
+                        result += '<a data-target="#userModel" data-toggle="modal" id="a' + msg.UserList[i].LOGIN_ID + '" class="btn btn-outline dark" onclick=\"javascript:fnEditUser(\'' + msg.UserList[i].LOGIN_ID + '\',\'' + msg.UserList[i].USER_NM + '\',\'' + msg.UserList[i].USER_EMAIL + '\',\'' + msg.UserList[i].USER_MOBILE + '\',\'' + msg.UserList[i].panNumber + '\',\'' + msg.UserList[i].userRole.ROLE_ID + '\',\'' + msg.UserList[i].nationality + '\',\'' + msg.UserList[i].USER_PWD + '\',\'' + msg.UserList[i].status + '\',\'' + msg.UserList[i].uploadAvatar + '\',\'' + msg.UserList[i].SALUTATION + '\',\'' + msg.UserList[i].designation.DESIGNATION_ID + '\',\'' + msg.UserList[i].department.DEPARTMENT_ID + '\',\'' + msg.UserList[i].businessUnit.businessUnitId + '\',\'' + FormatDate(msg.UserList[i].tenureEndDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].PersonalEmail + '\',\'' + msg.UserList[i].UserType + '\',\'' + FormatDate(msg.UserList[i].becomingInsiderDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].CategoryId + '\',\'' + msg.UserList[i].employeeId + '\',\'' + FormatDate(msg.UserList[i].joiningDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].ID + '\',\'' + msg.UserList[i].identificationType + '\',\'' + msg.UserList[i].identificationNumber + '\',\'' + strEmail + '\');\">Edit</a>';
                         result += '<td id="tdUserLogin_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].LOGIN_ID + '</td>';
                         result += '<td id="tdUserSalutation_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].SALUTATION + '</td>';
                         result += '<td id="tdUserNM_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].USER_NM + '</td>';
@@ -420,15 +433,13 @@ function fnGetUserList() {
                         result += '<td style="display:none;" id="tduserIdenttype_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].identificationType + '</td>';
                         result += '<td style="display:none;" id="tduserIdentnumber_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].identificationNumber + '</td>';
                         result += '<td id="tduserStatus_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].status + '</td>';
-                        result += '<td style="display:none;" id="tduserImage_' + msg.UserList[i].LOGIN_ID + '"><img style="width:50px;height:50px" class="img-circle" src="images/user/' + msg.UserList[i].uploadAvatar + '" alt="' + msg.UserList[i].uploadAvatar + '"/></td>';
-                        result += '</td>';
                         result += '</tr>';
                     }
                 }
                 var table = $('#tbl-user-setup').DataTable();
                 table.destroy();
                 $("#tbdUserList").html(result);
-                initializeDataTable('tbl-user-setup', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+                initializeDataTable('tbl-user-setup', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
                 // TableDatatablesButtons.init();
                 $("#Loader").hide();
             }
@@ -464,9 +475,16 @@ function fnGetAllUserList() {
             if (msg.StatusFl == true) {
                 var result = "";
                 for (var i = 0; i < msg.UserList.length; i++) {
+                    var strEmail = "";
+                    if (msg.UserList[i].Emails != null) {
+                        for (var j = 0; j < msg.UserList[i].Emails.length; j++) {
+                            strEmail += msg.UserList[i].Emails[j] + ";";
+                        }
+                    }
+
                     result += '<tr id="tr_' + msg.UserList[i].ID + '">';
                     result += '<td id="tdedit_' + msg.UserList[i].LOGIN_ID + '">';
-                    result += '<a data-target="#userModel" data-toggle="modal" id="a' + msg.UserList[i].LOGIN_ID + '" class="btn btn-outline dark" onclick=\"javascript:fnEditUser(\'' + msg.UserList[i].LOGIN_ID + '\',\'' + msg.UserList[i].USER_NM + '\',\'' + msg.UserList[i].USER_EMAIL + '\',\'' + msg.UserList[i].USER_MOBILE + '\',\'' + msg.UserList[i].panNumber + '\',\'' + msg.UserList[i].userRole.ROLE_ID + '\',\'' + msg.UserList[i].nationality + '\',\'' + msg.UserList[i].USER_PWD + '\',\'' + msg.UserList[i].status + '\',\'' + msg.UserList[i].uploadAvatar + '\',\'' + msg.UserList[i].SALUTATION + '\',\'' + msg.UserList[i].designation.DESIGNATION_ID + '\',\'' + msg.UserList[i].department.DEPARTMENT_ID + '\',\'' + msg.UserList[i].businessUnit.businessUnitId + '\',\'' + FormatDate(msg.UserList[i].tenureEndDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].PersonalEmail + '\',\'' + msg.UserList[i].UserType + '\',\'' + FormatDate(msg.UserList[i].becomingInsiderDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].CategoryId + '\',\'' + msg.UserList[i].employeeId + '\',\'' + FormatDate(msg.UserList[i].joiningDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].ID + '\',\'' + msg.UserList[i].identificationType + '\',\'' + msg.UserList[i].identificationNumber + '\');\">Edit</a>';
+                    result += '<a data-target="#userModel" data-toggle="modal" id="a' + msg.UserList[i].LOGIN_ID + '" class="btn btn-outline dark" onclick=\"javascript:fnEditUser(\'' + msg.UserList[i].LOGIN_ID + '\',\'' + msg.UserList[i].USER_NM + '\',\'' + msg.UserList[i].USER_EMAIL + '\',\'' + msg.UserList[i].USER_MOBILE + '\',\'' + msg.UserList[i].panNumber + '\',\'' + msg.UserList[i].userRole.ROLE_ID + '\',\'' + msg.UserList[i].nationality + '\',\'' + msg.UserList[i].USER_PWD + '\',\'' + msg.UserList[i].status + '\',\'' + msg.UserList[i].uploadAvatar + '\',\'' + msg.UserList[i].SALUTATION + '\',\'' + msg.UserList[i].designation.DESIGNATION_ID + '\',\'' + msg.UserList[i].department.DEPARTMENT_ID + '\',\'' + msg.UserList[i].businessUnit.businessUnitId + '\',\'' + FormatDate(msg.UserList[i].tenureEndDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].PersonalEmail + '\',\'' + msg.UserList[i].UserType + '\',\'' + FormatDate(msg.UserList[i].becomingInsiderDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].CategoryId + '\',\'' + msg.UserList[i].employeeId + '\',\'' + FormatDate(msg.UserList[i].joiningDate, $("input[id*=hdnDateFormat]").val()) + '\',\'' + msg.UserList[i].ID + '\',\'' + msg.UserList[i].identificationType + '\',\'' + msg.UserList[i].identificationNumber + '\',\'' + strEmail + '\');\">Edit</a>';
                     //result += '<a data-target="#userModel" data-toggle="modal" id="a' + msg.UserList[i].LOGIN_ID + '" class="btn btn-outline dark" onclick=\"javascript:fnEditUser(\'' + msg.UserList[i].LOGIN_ID + '\',\'' + msg.UserList[i].USER_NM + '\',\'' + msg.UserList[i].USER_EMAIL + '\',\'' + msg.UserList[i].USER_MOBILE + '\',\'' + msg.UserList[i].panNumber + '\',\'' + msg.UserList[i].userRole.ROLE_ID + '\',\'' + msg.UserList[i].nationality + '\',\'' + msg.UserList[i].USER_PWD + '\',\'' + msg.UserList[i].status + '\',\'' + msg.UserList[i].uploadAvatar + '\',\'' + msg.UserList[i].SALUTATION + '\',\'' + msg.UserList[i].designation.DESIGNATION_ID + '\',\'' + msg.UserList[i].department.DEPARTMENT_ID + '\',\'' + msg.UserList[i].businessUnit.businessUnitId + '\',\'' + msg.UserList[i].tenureEndDate + '\',\'' + msg.UserList[i].PersonalEmail + '\',\'' + msg.UserList[i].UserType + '\',\'' + msg.UserList[i].becomingInsiderDate + '\',\'' + msg.UserList[i].CategoryId + '\',\'' + msg.UserList[i].employeeId + '\',\'' + msg.UserList[i].joiningDate + '\',\'' + msg.UserList[i].ID + '\',\'' + msg.UserList[i].identificationType + '\',\'' + msg.UserList[i].identificationNumber + '\');\">Edit</a>';
                     result += '<td id="tdUserLogin_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].LOGIN_ID + '</td>';
                     result += '<td id="tdUserSalutation_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].SALUTATION + '</td>';
@@ -487,18 +505,13 @@ function fnGetAllUserList() {
                     result += '<td style="display:none;" id="tduserIdenttype_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].identificationType + '</td>';
                     result += '<td style="display:none;" id="tduserIdentnumber_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].identificationNumber + '</td>';
                     result += '<td id="tduserStatus_' + msg.UserList[i].LOGIN_ID + '">' + msg.UserList[i].status + '</td>';
-                    result += '<td style="display:none;" id="tduserImage_' + msg.UserList[i].LOGIN_ID + '"><img style="width:50px;height:50px" class="img-circle" src="images/user/' + msg.UserList[i].uploadAvatar + '" alt="' + msg.UserList[i].uploadAvatar + '"/></td>';
-                    //result += '<td id="tdedit_' + msg.UserList[i].LOGIN_ID + '">';
-                    ////if ($("#ContentPlaceHolder1_txtBusinessUnitId").val().trim() == msg.UserList[i].businessUnit.businessUnitId) {
-                    //result += '<a data-target="#userModel" data-toggle="modal" id="a' + msg.UserList[i].LOGIN_ID + '" class="btn btn-outline dark" onclick=\"javascript:fnEditUser(\'' + msg.UserList[i].LOGIN_ID + '\',\'' + msg.UserList[i].USER_NM + '\',\'' + msg.UserList[i].USER_EMAIL + '\',\'' + msg.UserList[i].USER_MOBILE + '\',\'' + msg.UserList[i].panNumber + '\',\'' + msg.UserList[i].userRole.ROLE_ID + '\',\'' + msg.UserList[i].nationality + '\',\'' + msg.UserList[i].USER_PWD + '\',\'' + msg.UserList[i].status + '\',\'' + msg.UserList[i].uploadAvatar + '\',\'' + msg.UserList[i].SALUTATION + '\',\'' + msg.UserList[i].designation.DESIGNATION_ID + '\',\'' + msg.UserList[i].department.DEPARTMENT_ID + '\',\'' + msg.UserList[i].businessUnit.businessUnitId + '\',\'' + msg.UserList[i].tenureEndDate + '\',\'' + msg.UserList[i].PersonalEmail + '\',\'' + msg.UserList[i].UserType + '\',\'' + msg.UserList[i].becomingInsiderDate + '\',\'' + msg.UserList[i].CategoryId + '\',\'' + msg.UserList[i].employeeId + '\',\'' + msg.UserList[i].joiningDate + '\',\'' + msg.UserList[i].identificationType + '\',\'' + msg.UserList[i].identificationNumber + '\',\'' + msg.UserList[i].ID + '\');\">edit</a>';
-                    //}
                     result += '</td>';
                     result += '</tr>';
                 }
                 var table = $('#tbl-user-setup').DataTable();
                 table.destroy();
                 $("#tbdUserList").html(result);
-                initializeDataTable('tbl-user-setup', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+                initializeDataTable('tbl-user-setup', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
                 // TableDatatablesButtons.init();
                 $("#Loader").hide();
             }
@@ -524,11 +537,18 @@ function fnGetAllUserList() {
 function OpenNew() {
     $("span[Id*='spnTitle']").html("New User");
     $("#txtUsrId").val("0");
+
+
+    $('#txtDateOfJoining').val(FormatDate(GetCurrentDt(), $("input[id*=hdnDateFormat]").val()));
+    $('#txtDateOfBecomingInsider').val(FormatDate(GetCurrentDt(), $("input[id*=hdnDateFormat]").val()));
+
+    $('#hdnDateOfJoining').val(GetCurrentDt);
+    $('#hdnDateOfBecomingInsider').val(GetCurrentDt);
+
+    //fnResetForm();
 }
 function fnSaveUser() {
     //alert("Here in fnSaveUser()");
-    $("input[id*='txtPassword']").val("P@ssw0rd");
-    $("input[id*='txtConfirm']").val("P@ssw0rd");
     if (fnValidate()) {
         var nationality = $("select[id *= ddlNationality]").val();
         if (nationality == 'NRI') {
@@ -557,6 +577,7 @@ function fnSaveUser() {
                 return false;
             }
         }
+
         //alert($("span[Id*='spnTitle']").html().toUpperCase());
         if ($("span[Id*='spnTitle']").html().toUpperCase() === "EDIT USER" && $("select[id*='ddlStatus']").val().toLowerCase() == "inactive") {
             if (confirm("You are about to Inactive user.Please confirm if you want to allow user to login through his/her personal email.")) {
@@ -591,12 +612,6 @@ function fnSaveUser() {
 function fnAddUpdateUser(emailFl) {
     //alert("here in fnAddUpdateUser");
     var userData = new FormData();
-    if ($("span[Id*='spnTitle']").html() === "New User") {
-        var newpassword = hex_sha512("P@ssw0rd");
-        $("input[id*='txtPassword']").val(newpassword);
-        $("input[id*='txtConfirm']").val(newpassword);
-    }
-
     var UserTyp = "";
     if ($("#radioAD").prop('checked') == true) {
         UserTyp = "AD/SAML";
@@ -605,48 +620,53 @@ function fnAddUpdateUser(emailFl) {
         UserTyp = "Application";
     }
     var UserColl = [];
-    UserColl[UserColl.length] = new User(
-        $("input[id*='txtUsrId']").val() == 0 ? 0 : $("input[id*='txtUsrId']").val(),
-        $("input[id*='txtName']").val(),
-        $("input[id*='txtEmail']").val(),
-        $("input[id*='txtPhone']").val(),
-        $("#txtPan").val(),
-        $("select[id*='ddlNationality']").val(),
-        $("input[id*='txtUserid']").val(),
-        $("input[id*='txtPassword']").val(),
-        $("select[id*='ddlStatus']").val(),
-        $("select[id*='ddlRole']").val(),
-        $('#ddlSalutation').val(),
-        $('#ddlDesignation').val(),
-        $('#ddlDepartment').val(),
-        $('#ddlBusinessUnit').val(),
-        $("input[id*='txtEmailPersonal']").val(),
-        $("input[id*='txtDateOfRetirement']").val(),
-        UserTyp,
-        $("input[id*='txtLoginUsingPersonalEmail']").val(),
-        $("input[id*='txtDateOfBecomingInsider']").val(),
-        $("select[id*='ddlCategory']").val(),
-        $("#txtEmployeeId").val(),
-        $("#txtDateOfJoining").val(),
-        $("select[id*='ddlIdentificationType']").val(),
-        $("input[id*='txtIdentificationNumber']").val(),
-        emailFl
-    );
+    var Emails = [];
+    for (var i = 0; i < $("#tbdEmail").children().length; i++) {
+        var sEml = $($($($("#tbdEmail").children()[i]).children()[0]).children()[0]).val();
+        if (sEml != undefined && sEml != "" && sEml != null) {
+            Emails.push(sEml);
+        }
+    }
 
-    userData.append("Object", JSON.stringify(UserColl));
+    var oUsr = new Object();
+    oUsr.ID = $("input[id*='txtUsrId']").val() == 0 ? 0 : $("input[id*='txtUsrId']").val();
+    oUsr.USER_NM = $("input[id*='txtName']").val();
+    oUsr.USER_EMAIL = $("input[id*='txtEmail']").val();
+    oUsr.USER_MOBILE = $("input[id*='txtPhone']").val();
+    oUsr.panNumber = $("#txtPan").val();
+    oUsr.nationality = $("select[id*='ddlNationality']").val();
+    oUsr.LOGIN_ID = $("input[id*='txtUserid']").val();
+    oUsr.status = $("select[id*='ddlStatus']").val();
+    oUsr.userRole = new Role($("select[id*='ddlRole']").val());
+    oUsr.SALUTATION = $('#ddlSalutation').val();
+    oUsr.designation = new Designation($('#ddlDesignation').val());
+    oUsr.department = new Department($('#ddlDepartment').val());
+    oUsr.businessUnit = new BusinessUnit($('#ddlBusinessUnit').val());
+    oUsr.PersonalEmail = $("input[id*='txtEmailPersonal']").val();
+    oUsr.tenureEndDate = $("input[id*='txtDateOfRetirement']").val();
+    oUsr.UserType = UserTyp;
+    oUsr.LoginUsingPersonalEmail = $("input[id*='txtLoginUsingPersonalEmail']").val();
+    oUsr.becomingInsiderDate = $("input[id*='txtDateOfBecomingInsider']").val();
+    oUsr.CategoryId = $("select[id*='ddlCategory']").val();
+    oUsr.employeeId = $("#txtEmployeeId").val();
+    oUsr.joiningDate = $("#txtDateOfJoining").val();
+    oUsr.identificationType = $("select[id*='ddlIdentificationType']").val();
+    oUsr.identificationNumber = $("input[id*='txtIdentificationNumber']").val();
+    oUsr.emailFl = emailFl;
+    oUsr.Emails = Emails;
 
-    //if ($("input[id*='fileUploadImage']").get(0).files.length > 0) {
-    //    userData.append("Files", $("input[id*='fileUploadImage']").get(0).files[0]);
-    //}
+    userData.append("Object", JSON.stringify(oUsr));
 
     var webUrl = uri + "/api/UserIT/SaveUser";
     $.ajax({
         type: 'POST',
         url: webUrl,
-        data: userData,
-        contentType: false,
+        //data: userData,
+        data: JSON.stringify(oUsr),
+        contentType: "application/json; charset=utf-8",
+        datatype: "json",
         async: true,
-        processData: false,
+        //processData: false,
         success: function (msg) {
 
             if (msg.StatusFl == false) {
@@ -668,7 +688,7 @@ function fnAddUpdateUser(emailFl) {
                 //fnGetUserList();
                 //$('#btnSave').attr("data-dismiss", "modal");
                 //return true;
-                window.location.reload();
+                //window.location.reload();
             }
         },
         error: function (error) {
@@ -741,8 +761,6 @@ function fnClearForm() {
     $('#txtDateofbirth').val('');
     $('#ddlNationality').val(0)
     $('#txtUserid').val('');
-    $('#txtPassword').val('');
-    $('#txtConfirm').val('');
     $('#ddlStatus').val(0);
     $('#ddlSalutation').val(0);
     $('#ddlDesignation').val(0);
@@ -750,13 +768,13 @@ function fnClearForm() {
     $('#ddlBusinessUnit').val(0);
     $('#txtUserid').prop('disabled', false);
     $('#txtEmail').prop('disabled', false);
-    $("#txtPassword").prop('disabled', false);
-    $("#txtConfirm").prop('disabled', false);
     $('#txtEmailPersonal').val('');
     $('#txtDateOfRetirement').val('');
     $('#txtLoginUsingPersonalEmail').val('No');
     $("select[id*='ddlCategory']").val(0);
     $("#txtEmployeeId").val('');
+    $("#hdnDateOfJoining").val('');
+    $("#hdnDateOfBecomingInsider").val('');
     //  uploadedFile = null;
     $("#file").val('');
     fnRemoveClass(null, 'Email');
@@ -777,20 +795,38 @@ function fnClearForm() {
     fnRemoveClass(null, 'RetirementDate');
     fnRemoveClass(null, 'Category');
     fnRemoveClass(null, 'DateOfJoining');
-    $("#aUserAvatarImageUploaded").hide();
+    //$("#aUserAvatarImageUploaded").hide();
     $("input[id*='txtDateOfBecomingInsider']").val('');
     $("input[name='radio2']").attr('checked', false);
     $("input[id*='txtDateOfJoining']").val('');
+
+    var str = "";
+    str += "<tr>";
+    str += "<td style='width:85%;padding-top:10px;'>";
+    str += "<input id='txtMEmail' type='email' class='form-control restrictpaste' placeholder='Email Address' autocomplete='off' />";
+    str += "</td>";
+    str += "<td style='width:15%;padding-left:10px;'>";
+    str += "<a onclick='javascript:fnAddNewRow();'>";
+    str += "<i class='fa fa-plus'></i>";
+    str += "</a>&nbsp;&nbsp;";
+    //str += "<a onclick='javascript:fnRemoveRow(this);'>";
+    //str += "<i class='fa fa-minus'></i>";
+    //str += "</a>";
+    str += "</td>";
+    str += "</tr>";
+    $("#tbdEmail").html(str);
 }
-function fnEditUser(user_key, user_name, user_mail, phnumber, pan, role, nationality, USER_PWD, status, uploadAvatar, SALUTATION, DESIGNATION_ID, DEPARTMENT_ID,
-    buId, tenureEndDate, PersonalEmail, UserType, DateOfBecomingInsider, Category, EmployeeId, DateOfJoining, ID, identificationType, identifiactionnumber) {
+function fnEditUser(
+    user_key, user_name, user_mail, phnumber, pan, role, nationality, USER_PWD, status, uploadAvatar, SALUTATION, DESIGNATION_ID,
+    DEPARTMENT_ID, buId, tenureEndDate, PersonalEmail, UserType, DateOfBecomingInsider, Category, EmployeeId, DateOfJoining, ID,
+    identificationType, identifiactionnumber, strEmail
+) {
+    //alert(strEmail);
     $("span[Id*='spnTitle']").html("Edit User");
     $("#txtUsrId").val(ID);
     $('#txtUserid').val(user_key);
     $('#txtName').val(user_name);
     $('#txtEmail').val(user_mail);
-    $('#txtPassword').val(USER_PWD);
-    $('#txtConfirm').val(USER_PWD);
     $('#txtPhone').val(phnumber);
     $("#txtPan").val(pan);
     $('#ddlRole').val(role);
@@ -821,17 +857,6 @@ function fnEditUser(user_key, user_name, user_mail, phnumber, pan, role, nationa
     $('#ddlBusinessUnit').val(buId);
     $('#txtUserid').prop('disabled', true);
     //$('#txtEmail').prop('disabled', true);
-    $("#txtPassword").prop('disabled', true);
-    $("#txtConfirm").prop('disabled', true);
-    //alert("uploadAvatar=" + uploadAvatar);
-    /*if (uploadAvatar !== undefined && uploadAvatar !== null && uploadAvatar.trim() !== '') {
-        $("#aUserAvatarImageUploaded").show();
-        $("#aUserAvatarImageUploaded").attr('href', 'images/user/' + uploadAvatar);
-        $("#imgUsr").attr('src', 'images/user/' + uploadAvatar);
-    }
-    else {
-        $("#aUserAvatarImageUploaded").hide();
-    }*/
     $("select[id*='ddlCategory']").val(Category);
     if (UserType == "AD/SAML") {
         $("input[id='radioAD']").prop("checked", true);
@@ -842,6 +867,10 @@ function fnEditUser(user_key, user_name, user_mail, phnumber, pan, role, nationa
 
     $("#txtEmployeeId").val(EmployeeId);
     $("#txtDateOfJoining").val(DateOfJoining);
+
+    $("#hdnDateOfJoining").val(convertToDateTime(DateOfJoining));
+    $("#hdnDateOfBecomingInsider").val(convertToDateTime(DateOfBecomingInsider));
+    
     if ($("select[id*=ddlNationality]").val() == 'NRI') {
         $("select[id*=ddlIdentificationType]").val(identificationType);
         $("input[id*='txtIdentificationNumber']").val(identifiactionnumber);
@@ -870,6 +899,30 @@ function fnEditUser(user_key, user_name, user_mail, phnumber, pan, role, nationa
             $("#spnIdentificationType").hide();
             $("#spnIdentification").hide();
         }
+    }
+
+    if (strEmail != "" && strEmail != null) {
+        var arrEmail = strEmail.split(';');
+        //alert(arrEmail.length);
+        var str = "";
+        for (var x = 0; x < arrEmail.length-1; x++) {
+            str += "<tr>";
+            str += "<td style='width:85%;padding-top:10px;'>";
+            str += "<input id='txtMEmail' value='" + arrEmail[x] + "' type = 'email' class='form-control restrictpaste' placeholder = 'Email Address' autocomplete = 'off' /> ";
+            str += "</td>";
+            str += "<td style='width:15%;padding-left:10px;'>";
+            str += "<a onclick='javascript:fnAddNewRow();'>";
+            str += "<i class='fa fa-plus'></i>";
+            str += "</a>&nbsp;&nbsp;";
+            if (x > 0) {
+                str += "<a onclick='javascript:fnRemoveRow(this);'>";
+                str += "<i class='fa fa-minus'></i>";
+                str += "</a>";
+            }
+            str += "</td>";
+            str += "</tr>";
+        }
+        $("#tbdEmail").html(str);
     }
 }
 function fnRemoveClass(obj, val) {
@@ -1088,8 +1141,10 @@ function fnGetBusinessUnitList() {
     });
 }
 function User(
-    ID, userName, emailId, phone, pan, nationality, userLogin, password, status, roleId, salutation, designationId, departmentId, buId, personalEmail,
-    retirementDate, UserType, LoginUsingPersonalEmail, DateofBecomingInsider, Category, EmployeeId, DateOfJoining, identifcationType, identifcationNo, emailFl) {
+    ID, userName, emailId, phone, pan, nationality, userLogin, password, status, roleId, salutation, designationId, departmentId, buId,
+    personalEmail, retirementDate, UserType, LoginUsingPersonalEmail, DateofBecomingInsider, Category, EmployeeId, DateOfJoining,
+    identifcationType, identifcationNo, emailFl, Emails
+) {
     this.ID = ID;
     this.USER_NM = userName;
     this.USER_EMAIL = emailId;
@@ -1115,6 +1170,7 @@ function User(
     this.identificationType = identifcationType;
     this.identificationNumber = identifcationNo;
     this.emailFl = emailFl;
+    this.Emails = Emails;
 }
 function Role(roleId) {
     this.ROLE_ID = roleId;
@@ -1357,10 +1413,55 @@ function fnValidate() {
             }
         }
     }
+    //Code to validate the multiple emails. if email is defined, check the format of the email
+    for (var i = 0; i < $("#tbdEmail").children().length; i++) {
+        var sEml = $($($($("#tbdEmail").children()[i]).children()[0]).children()[0]).val();
+        if (sEml != undefined && sEml != "" && sEml != null) {
+            var regemail = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+            if (!regemail.test(sEml)) {
+                flag = true;
+                alert("Email " + sEml + " is not in proper format");
+                return false;
+            }
+        }
+    }
     if (flag) {
         alert("Please fill in the required information");
     }
-    //alert("flag=" + flag);
+
+    //Code to validate if date of separation is entered than remarks are mandatory
+    if ($("#txtDateOfRetirement").val() != "" && $("#txtDateOfRetirement").val() != null) {
+        if ($("#txtRemarks").val() == "" || $("#txtRemarks").val() == null) {
+            alert("Please fill in the remarks");
+            return false;
+        }
+        if ($("#txtEmailPersonal").val() == "" || $("#txtEmailPersonal").val() == null) {
+            alert("Please fill in the personal email");
+            return false;
+        }
+    }
+
+    //Separation date must be greater than both Joining date and Date of becoming insider
+    var joiningDt = $("#hdnDateOfJoining").val();
+    var becomingDt = $("#hdnDateOfBecomingInsider").val();
+    var retirementDt = convertToDateTime($("#txtDateOfRetirement").val());
+
+    if ($("#txtDateOfRetirement").val() != "" && $("#txtDateOfRetirement").val() != null) {
+        if (retirementDt < becomingDt || retirementDt < joiningDt) {
+            alert("Date of Separation must be greater than the Date of Joining and Date of Becoming Insider");
+            return false;
+        }
+    }
+    //If Separation date is future date than status would remain active, so that user can login till the separation date
+    //If Separation date is past date than Inactive the user, so that user cannot login with its personal email
+    if ($("#txtDateOfRetirement").val() != "" && $("#txtDateOfRetirement").val() != null) {
+        if (retirementDt > GetCurrentDt()) {
+            $("#ddlStatus").val("Active");
+        }
+        else {
+            $("#ddlStatus").val("Inactive");
+        }
+    }
     return !flag;
 }
 function ConvertToDateTime(dateTime) {
@@ -1371,5 +1472,82 @@ function ConvertToDateTime(dateTime) {
         var date = dateTime.split(" ")[0];
 
         return (date.split("/")[1] + "/" + date.split("/")[0] + "/" + date.split("/")[2]);
+    }
+}
+function fnResetForm() {
+    $("#txtEmail").val('');
+    $("#ddlSalutation").val('0');
+    $("txtName").val('');
+    $("txtPhone").val('');
+    $("ddlNationality").val('0');
+    $("select[id*=ddlIdentificationType]").val('');
+    $("input[id*=txtIdentificationNumber]"), val('');
+    $("#txtPan").val('');
+    $("#txtUserid").val('');
+    $("#txtUsrId").val('');
+    $("#txtUserID").val('');
+    $("#txtEmployeeId").val('');
+    $("#txtEmailPersonal").val('');
+    $("#txtDateOfJoining").val('');
+    $("#txtDateOfBecomingInsider").val('');
+    $("#txtDateOfRetirement").val('');
+    $("#ddlRole").val("0");
+    $("#select[id*=ddlCategory]").val("0");
+    $("#ddlDesignation").val("0");
+    $("#ddlDepartment").val("0");
+    $("#ddlBusinessUnit").val("0");
+    $("#ddlStatus").val("0");
+    $("#hdnDateOfJoining").val('');
+    $("#hdnDateOfBecomingInsider").val('');
+    //<input type="radio" id="radioAD" name="radio2" class="md-radiobtn" />
+    //<input type="radio" id="radioApplication" name="radio2" class="md-radiobtn" />
+
+    var str = "";
+    str += "<tr>";
+    str += "<td style='width:85%;padding-top:10px;'>";
+    str += "<input id='txtMEmail' type='email' class='form-control restrictpaste' placeholder='Email Address' autocomplete='off' />";
+    str += "</td>";
+    str += "<td style='width:15%;padding-left:10px;'>";
+    str += "<a onclick='javascript:fnAddNewRow();'>";
+    str += "<i class='fa fa-plus'></i>";
+    str += "</a>&nbsp;&nbsp;";
+    //str += "<a onclick='javascript:fnRemoveRow(this);'>";
+    //str += "<i class='fa fa-minus'></i>";
+    //str += "</a>";
+    str += "</td>";
+    str += "</tr>";
+    $("#tbdEmail").html(str);
+}
+function fnAddNewRow() {
+    var str = "";
+    str += "<tr>";
+    str += "<td style='width:85%;padding-top:10px;'>";
+    str += "<input id='txtMEmail' type='email' class='form-control restrictpaste' placeholder='Email Address' autocomplete='off' />";
+    str += "</td>";
+    str += "<td style='width:15%;padding-left:10px;'>";
+    str += "<a onclick='javascript:fnAddNewRow();'>";
+    str += "<i class='fa fa-plus'></i>";
+    str += "</a>&nbsp;&nbsp;";
+    str += "<a onclick='javascript:fnRemoveRow(this);'>";
+    str += "<i class='fa fa-minus'></i>";
+    str += "</a>";
+    str += "</td>";
+    str += "</tr>";
+    $("#tbdEmail").append(str);
+
+    //fnSetDate();
+}
+function fnRemoveRow(cntrl) {
+    var obj = $(cntrl).closest('tr');
+    $(obj).remove();
+    var flag = false;
+    for (var i = 0; i < $("#tbdTrade").children().length; i++) {
+        var sRelativeId = $($($($("#tbdTrade").children()[i]).children()[0]).children()[0]).val();
+        if (sRelativeId != "-1") {
+            flag = true;
+        }
+    }
+    if (flag == false) {
+        $("#btnSubmitTD").text("Skip & Continue to Pre-Clearance Request");
     }
 }

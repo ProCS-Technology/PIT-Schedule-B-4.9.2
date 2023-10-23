@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/InsiderTrading/InsiderTradingMaster.Master" CodeBehind="BenposFieldMapping.aspx.cs" Inherits="ProcsDLL.InsiderTrading.BenposFieldMapping" %>
+﻿<%@ Page ValidateRequest="true" Language="C#" AutoEventWireup="true" MasterPageFile="~/InsiderTrading/InsiderTradingMaster.Master" CodeBehind="BenposFieldMapping.aspx.cs" Inherits="ProcsDLL.InsiderTrading.BenposFieldMapping" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <link href="../assets/global/css/components.min.css" rel="stylesheet" />
     <link href="../assets/global/css/plugins.min.css" rel="stylesheet" />
@@ -24,7 +24,6 @@
                                     <div class="col-md-3">
                                         <asp:DropDownList ID="DropDownListType" CssClass="form-control" runat="server" AutoPostBack="true" OnSelectedIndexChanged="DropDownListType_SelectedIndexChanged">
                                             <asp:ListItem Value="Benpos">Benpos</asp:ListItem>
-                                            <%--<asp:ListItem Value="ESOP">ESOP</asp:ListItem>--%>
                                         </asp:DropDownList>
                                     </div>
                                 </div>
@@ -40,9 +39,7 @@
                                 <tbody id="tbdDepartmentList">                                    
                                     <tr>
                                         <td>1</td>
-                                        <td>
-                                            Name
-                                        </td>
+                                        <td>Name</td>
                                         <td>
                                             <asp:TextBox ID="TextBoxName" CssClass="form-control" runat="server"></asp:TextBox>
                                         </td>
@@ -76,9 +73,7 @@
                                     </tr>
                                     <tr>
                                         <td>5</td>
-                                        <td>
-                                            Type
-                                        </td>
+                                        <td>Type</td>
                                         <td>
                                             <asp:TextBox ID="TextBoxCategory" CssClass="form-control" runat="server"></asp:TextBox>
                                         </td>
@@ -134,10 +129,8 @@
             else {               
 
                 return true;
-            }
-            
+            }            
         }
-
         function fnRemoveClass(val) {
             $("#" + val).removeClass('text-danger');
         }

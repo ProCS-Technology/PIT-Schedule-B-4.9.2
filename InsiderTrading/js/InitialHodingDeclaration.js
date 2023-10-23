@@ -529,7 +529,9 @@ function fnAddInitialHoldingDeclarationDetailPhysical() {
         obj.relative.relativeName = $("#ddlForPhysical option:selected").text();
         var panNumber = $("#txtPanPhysical").val() == null ? 0 : ($("#txtPanPhysical").val().trim() == "" ? 0 : $("#txtPanPhysical").val());
         //obj.OtherDematAccount = $("#ddlPhysicalDematAccNo option:selected").text();
-        obj.OtherDematAccount = $("#ddlPhysicalDematAccNo").val();
+        //alert($("#ddlPhysicalDematAccNo").val());
+        //alert(encodeHTMLEntities($("#ddlPhysicalDematAccNo").val()));
+        obj.OtherDematAccount = encodeHTMLEntities($("#ddlPhysicalDematAccNo").val());
         var securityTypeName = $("select[id*=ddlOtherSecurityType] option:selected").text();
         var securityTypeId = $("select[id*=ddlOtherSecurityType]").val();
         obj.OthersecurityType = securityTypeId;

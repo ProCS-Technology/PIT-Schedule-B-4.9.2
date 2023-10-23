@@ -16,6 +16,10 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Script.Serialization;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net;
+
 namespace ProcsDLL.Controllers.InsiderTrading
 {
     [RoutePrefix("api/Benpos")]
@@ -44,6 +48,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 String sSaveAs = String.Empty;
                 String sSaveAs1 = String.Empty;
                 String input = HttpContext.Current.Request.Form["Object"];
+                String sFileSize = HttpContext.Current.Request.Form["FileSize"];
                 BenposHeader rel = new JavaScriptSerializer().Deserialize<BenposHeader>(input);
                 rel.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
                 rel.createdBy = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
@@ -72,30 +77,48 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     for (int i = 0; i < files.Count; i++)
                     {
                         HttpPostedFile file = files[i];
+                        int cLength = file.ContentLength;
                         String ext = Path.GetExtension(file.FileName);
                         string sNm = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "Benpos_";
                         string fname;
-
-                        if (sNm.Contains("%00"))
+                        string sContentTyp = file.ContentType;
+                        if (sContentTyp.ToUpper() == "APPLICATION/VND.MS-EXCEL" || sContentTyp.ToUpper() == "APPLICATION/VND.OPENXMLFORMATS-OFFICEDOCUMENT.SPREADSHEETML.SHEET")
                         {
-                            NonCompliantTaskResponse objResponse = new NonCompliantTaskResponse();
-                            objResponse.StatusFl = false;
-                            objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
-                            return objResponse;
-                        }
-                        if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
-                        {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), fname);
-                            file.SaveAs(sSaveAs);
-                            rel.fileName = fname;
+                            if (sFileSize != cLength.ToString())
+                            {
+                                NonCompliantTaskResponse objResponse = new NonCompliantTaskResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document is corrupt, please upload correct the one.";
+                                return objResponse;
+                            }
+                            if (sNm.Contains("%00"))
+                            {
+                                NonCompliantTaskResponse objResponse = new NonCompliantTaskResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                                return objResponse;
+                            }
+                            if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                            {
+                                fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), fname);
+                                file.SaveAs(sSaveAs);
+                                rel.fileName = fname;
+                            }
+                            else
+                            {
+                                NonCompliantTaskResponse objResponse = new NonCompliantTaskResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                                return objResponse;
+                            }
                         }
                         else
                         {
                             NonCompliantTaskResponse objResponse = new NonCompliantTaskResponse();
                             objResponse.StatusFl = false;
-                            objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                            objResponse.Msg = "Content type of the uploaded document does not matched with the permissible document";
                             return objResponse;
                         }
                     }
@@ -112,6 +135,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 }
                 rel.createdBy = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
                 rel.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
 
                 pReq = new BenposRequest(rel);
                 BenposResponse pRes = pReq.SaveBenposHdr();
@@ -269,26 +293,36 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 }
                 rel.id = pRes.BenposHeader.id;
 
-                pReq = new BenposRequest(rel);
-                pRes = pReq.UpdateBenposDetail();
-                if (pRes.StatusFl)
+                if (rel.ValidateInput())
                 {
-                    NonCompliantTask nonCompliantTask = new NonCompliantTask();
-                    nonCompliantTask.createdBy = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-                    nonCompliantTask.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
-                    nonCompliantTask.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
-                    nonCompliantTask.asOfDate = !String.IsNullOrEmpty(Convert.ToString(rel.asOfDate)) ? Convert.ToString(rel.asOfDate) : String.Empty;
-                    nonCompliantTask.ADMIN_DATABASE = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
-                    nonCompliantTask.id = rel.id;
-                    NonCompliantTaskRequest getRunNowCompliantFinder = new NonCompliantTaskRequest(nonCompliantTask);
-                    NonCompliantTaskResponse gResRunNowCompliantFinder = getRunNowCompliantFinder.RunNowCompliantFinder();
-                    return gResRunNowCompliantFinder;
+                    pReq = new BenposRequest(rel);
+                    pRes = pReq.UpdateBenposDetail();
+                    if (pRes.StatusFl)
+                    {
+                        NonCompliantTask nonCompliantTask = new NonCompliantTask();
+                        nonCompliantTask.createdBy = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
+                        nonCompliantTask.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                        nonCompliantTask.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
+                        nonCompliantTask.asOfDate = !String.IsNullOrEmpty(Convert.ToString(rel.asOfDate)) ? Convert.ToString(rel.asOfDate) : String.Empty;
+                        nonCompliantTask.ADMIN_DATABASE = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
+                        nonCompliantTask.id = rel.id;
+                        NonCompliantTaskRequest getRunNowCompliantFinder = new NonCompliantTaskRequest(nonCompliantTask);
+                        NonCompliantTaskResponse gResRunNowCompliantFinder = getRunNowCompliantFinder.RunNowCompliantFinder();
+                        return gResRunNowCompliantFinder;
+                    }
+                    else
+                    {
+                        NonCompliantTaskResponse objResponse = new NonCompliantTaskResponse();
+                        objResponse.StatusFl = false;
+                        objResponse.Msg = pRes.Msg;//"Processing failed due to system error!";
+                        return objResponse;
+                    }
                 }
                 else
                 {
                     NonCompliantTaskResponse objResponse = new NonCompliantTaskResponse();
                     objResponse.StatusFl = false;
-                    objResponse.Msg = pRes.Msg;//"Processing failed due to system error!";
+                    objResponse.Msg = sXSSErrMsg;
                     return objResponse;
                 }
             }
@@ -356,6 +390,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
 
                 String sSaveAs = String.Empty;
                 String input = HttpContext.Current.Request.Form["Object"];
+                String sFileSize = HttpContext.Current.Request.Form["FileSize"];
                 BenposHeader rel = new JavaScriptSerializer().Deserialize<BenposHeader>(input);
                 rel.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
                 rel.createdBy = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
@@ -376,30 +411,48 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     for (int i = 0; i < files.Count; i++)
                     {
                         HttpPostedFile file = files[i];
+                        int cLength = file.ContentLength;
                         String ext = Path.GetExtension(file.FileName);
                         string sNm = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "ESOP_";
                         string fname;
-
-                        if (sNm.Contains("%00"))
+                        string sContentTyp = file.ContentType;
+                        if (sContentTyp.ToUpper() == "APPLICATION/VND.MS-EXCEL" || sContentTyp.ToUpper() == "APPLICATION/VND.OPENXMLFORMATS-OFFICEDOCUMENT.SPREADSHEETML.SHEET")
                         {
-                            BenposResponse objResponse = new BenposResponse();
-                            objResponse.StatusFl = false;
-                            objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
-                            return objResponse;
-                        }
-                        if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
-                        {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), fname);
-                            file.SaveAs(sSaveAs);
-                            rel.fileNameESOP = fname;
+                            if (sFileSize != cLength.ToString())
+                            {
+                                BenposResponse objResponse = new BenposResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document is corrupt, please upload correct the one.";
+                                return objResponse;
+                            }
+                            if (sNm.Contains("%00"))
+                            {
+                                BenposResponse objResponse = new BenposResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                                return objResponse;
+                            }
+                            if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                            {
+                                fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), fname);
+                                file.SaveAs(sSaveAs);
+                                rel.fileNameESOP = fname;
+                            }
+                            else
+                            {
+                                BenposResponse objResponse = new BenposResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                                return objResponse;
+                            }
                         }
                         else
                         {
                             BenposResponse objResponse = new BenposResponse();
                             objResponse.StatusFl = false;
-                            objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                            objResponse.Msg = "Content type of the uploaded document does not matched with the permissible document";
                             return objResponse;
                         }
                     }
@@ -689,6 +742,115 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objResponse.StatusFl = false;
                 objResponse.Msg = ex.Message;
                 return objResponse;
+            }
+        }
+
+
+
+        [Route("GetBenposFile")]
+        [HttpGet]
+        [SwaggerOperation(Tags = new[] { "Benpos APIs" })]
+        public HttpResponseMessage GetBenposFile()
+        {
+            try
+            {
+                //if (HttpContext.Current.Session.Count == 0)
+                //{
+                //    BenposResponse objResponse = new BenposResponse();
+                //    objResponse.StatusFl = false;
+                //    objResponse.Msg = "SessionExpired";
+                //    return objResponse;
+                //}
+                
+                string sBenposId = Convert.ToString(HttpContext.Current.Request.QueryString["BenposId"]);
+                string str = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["ConnectionStringIT"]), true);
+                string sFileNm = "";
+
+                using (SqlConnection sCon = new SqlConnection(str))
+                {
+                    SqlCommand sCmd = new SqlCommand();
+                    sCmd.Connection = sCon;
+                    sCmd.CommandType = CommandType.Text;
+                    sCon.Open();
+                    sCmd.CommandText = "SELECT FILENAME FROM PROCS_INSIDER_BENPOS_HDR(NOLOCK) WHERE HDR_ID=" + sBenposId;
+                    sFileNm = Convert.ToString(sCmd.ExecuteScalar());
+                }
+                string sFile = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), sFileNm);
+
+                byte[] fileBook = File.ReadAllBytes(sFile);// tempPathExcelFile);
+                MemoryStream stream = new MemoryStream();
+                string excelBase64String = Convert.ToBase64String(fileBook);
+                StreamWriter excelWriter = new StreamWriter(stream);
+                excelWriter.Write(excelBase64String);
+                excelWriter.Flush();
+                stream.Position = 0;
+                HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+                httpResponseMessage.Content = new StreamContent(stream);
+                httpResponseMessage.Content.Headers.Add("x-filename", "ExcelReport.xlsx");
+                httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+                httpResponseMessage.Content.Headers.ContentDisposition =
+                    new ContentDispositionHeaderValue("attachment");
+                httpResponseMessage.Content.Headers.ContentDisposition.FileName = "ExcelReport.xlsx";
+                httpResponseMessage.StatusCode = HttpStatusCode.OK;
+                return httpResponseMessage;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                //return ReturnError(ErrorType.Error, errorMessage);
+            }
+        }
+        [Route("GetESOPFile")]
+        [HttpGet]
+        [SwaggerOperation(Tags = new[] { "Benpos APIs" })]
+        public HttpResponseMessage GetESOPFile()
+        {
+            try
+            {
+                //if (HttpContext.Current.Session.Count == 0)
+                //{
+                //    BenposResponse objResponse = new BenposResponse();
+                //    objResponse.StatusFl = false;
+                //    objResponse.Msg = "SessionExpired";
+                //    return objResponse;
+                //}
+
+                string sEsopId = Convert.ToString(HttpContext.Current.Request.QueryString["EsopId"]);
+                string str = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["ConnectionStringIT"]), true);
+                string sFileNm = "";
+
+                using (SqlConnection sCon = new SqlConnection(str))
+                {
+                    SqlCommand sCmd = new SqlCommand();
+                    sCmd.Connection = sCon;
+                    sCmd.CommandType = CommandType.Text;
+                    sCon.Open();
+                    sCmd.CommandText = "SELECT FILENAME FROM PROCS_INSIDER_BENPOS_HDR(NOLOCK) WHERE HDR_ID=" + sEsopId;
+                    sFileNm = Convert.ToString(sCmd.ExecuteScalar());
+                }
+                string sFile = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/Benpos/"), sFileNm);
+
+                byte[] fileBook = File.ReadAllBytes(sFile);// tempPathExcelFile);
+                MemoryStream stream = new MemoryStream();
+                string excelBase64String = Convert.ToBase64String(fileBook);
+                StreamWriter excelWriter = new StreamWriter(stream);
+                excelWriter.Write(excelBase64String);
+                excelWriter.Flush();
+                stream.Position = 0;
+                HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+                httpResponseMessage.Content = new StreamContent(stream);
+                httpResponseMessage.Content.Headers.Add("x-filename", "ExcelReport.xlsx");
+                httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+                httpResponseMessage.Content.Headers.ContentDisposition =
+                    new ContentDispositionHeaderValue("attachment");
+                httpResponseMessage.Content.Headers.ContentDisposition.FileName = "ExcelReport.xlsx";
+                httpResponseMessage.StatusCode = HttpStatusCode.OK;
+                return httpResponseMessage;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                //return ReturnError(ErrorType.Error, errorMessage);
             }
         }
     }
