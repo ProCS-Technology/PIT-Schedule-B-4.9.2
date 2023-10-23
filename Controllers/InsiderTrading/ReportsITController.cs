@@ -673,6 +673,49 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 return objResponse;
             }
         }
+        //==========pending tsk rpt by skm=============
+        [Route("GetPendingTaskReport")]
+        [HttpPost]
+        [SwaggerOperation(Tags = new[] { "Report APIs" })]
+        public ReportsResponse GetPendingTaskReport()
+        {
+            try
+            {
+                if (HttpContext.Current.Session.Count == 0)
+                {
+                    ReportsResponse objResponse = new ReportsResponse();
+                    objResponse.StatusFl = false;
+                    objResponse.Msg = "SessionExpired";
+                    return objResponse;
+                }
+                string input;
+                using (System.IO.StreamReader sr = new System.IO.StreamReader(HttpContext.Current.Request.InputStream))
+                {
+                    input = sr.ReadToEnd();
+                }
+                Email ObjReport = new JavaScriptSerializer().Deserialize<Email>(input);
+                //ObjReport.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                ObjReport.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
+                if (!ObjReport.ValidateInput())
+                {
+                    ReportsResponse objResponse = new ReportsResponse();
+                    objResponse.StatusFl = false;
+                    objResponse.Msg = sXSSErrMsg;
+                    return objResponse;
+                }
+                ReportsRequest gReqReport = new ReportsRequest(ObjReport);
+                ReportsResponse gResReport = gReqReport.GetPendingTaskReport();
+                return gResReport;
+            }
+            catch (Exception ex)
+            {
+                ReportsResponse objResponse = new ReportsResponse();
+                objResponse.StatusFl = false;
+                objResponse.Msg = ex.Message;
+                return objResponse;
+            }
+        }
+        //===================================
         [Route("SendDisclousertaskEmail")]
         [HttpPost]
         [SwaggerOperation(Tags = new[] { "Report APIs" })]
@@ -696,13 +739,6 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objUser.CREATED_BY = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
                 objUser.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
                 objUser.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
-
-                if (!objUser.ValidateInput())
-                {
-                    objResponse.StatusFl = false;
-                    objResponse.Msg = sXSSErrMsg;
-                    return objResponse;
-                }
 
                 if (objUser.emailReport.Count > 0)
                 {

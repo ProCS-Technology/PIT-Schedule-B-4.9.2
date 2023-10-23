@@ -12,6 +12,7 @@ namespace ProcsDLL.Models.InsiderTrading.Service.Response
         private List<UPSICommunication> _lstUPSIReport;
         private List<LogsReport> _lstLogsReport;
         private List<User> _lstDisclouserReport;
+        private List<Email> _lstPendingTaskReport;
         public DeclarationReport DeclarationReport
         {
             set
@@ -100,6 +101,17 @@ namespace ProcsDLL.Models.InsiderTrading.Service.Response
             get
             {
                 return _lstDisclouserReport;
+            }
+        }
+        public List<Email> lstPendingTaskReport
+        {
+            set
+            {
+                _lstPendingTaskReport = value;
+            }
+            get
+            {
+                return _lstPendingTaskReport;
             }
         }
     }
