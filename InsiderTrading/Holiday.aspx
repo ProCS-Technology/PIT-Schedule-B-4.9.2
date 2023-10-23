@@ -125,6 +125,12 @@
                                             <input id="txtdate" type="text" class="form-control" placeholder="Enter Holiday Date" name="from_date" autocomplete="off" />
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label id="lbldates" style="text-align: left" class="col-md-4 control-label">Holiday Date<span class="required"> * </span></label>
+                                        <div class="col-md-8">
+                                            <input id="txtdates" type="text" class="form-control" placeholder="Enter Holiday Date" name="from_date" autocomplete="off" />
+                                        </div>
+                                    </div>
                                     <br />
                                 </div>
 
