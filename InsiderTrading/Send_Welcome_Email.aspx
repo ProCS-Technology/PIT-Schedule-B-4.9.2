@@ -102,19 +102,9 @@
     <script src="js/Global.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.summernote').summernote({
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'italic', 'underline', 'clear']],
-                    ['fontname', ['fontname']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['height', ['height']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'hr']],
-                    ['view', ['fullscreen', 'codeview']],
-                    ['help', ['help']]
-                ]
+            $('#summernote_1').summernote({
+                codeviewFilter: false,
+                codeviewIframeFilter: true
             });
         });
         function fnloader() {

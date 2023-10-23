@@ -140,9 +140,9 @@ function fnGetAllBenposHdr() {
                     str += '<td>' + msg.BenposHeaderList[index].fromDate + '</td>';
                     str += '<td>' + msg.BenposHeaderList[index].toDate + '</td>';
                     str += '<td>' + msg.BenposHeaderList[index].type + '</td>';
-                    str += '<td><a class="fa fa-download" target="_blank" href="Benpos/' + msg.BenposHeaderList[index].fileName + '"></a></td>';
+                    str += '<td><a class="fa fa-download" onclick=\'javascript:fnDownloadBenpos("' + msg.BenposHeaderList[index].id + '");\'></a></td>';
                     if (index == 0) {
-                        str += '<td><a class="fa fa-trash" style="color:red;margin-left:10px;" data-target="#modalDeleteBenposDetail" data-toggle="modal" id="d' + msg.BenposHeaderList[index].id + '" onclick=\'javascript:fnDeleteBenposList("' + msg.BenposHeaderList[index].id + '");\'"></a></td>';
+                        str += '<td><a class="fa fa-trash" style="color:red;margin-left:10px;" data-target="#modalDeleteBenposDetail" data-toggle="modal" id="d' + msg.BenposHeaderList[index].id + '" onclick=\'javascript:fnDeleteBenposList("' + msg.BenposHeaderList[index].id + '");\'></a></td>';
                     }
                     else {
                         str += '<td></td>';
@@ -166,6 +166,29 @@ function fnSubmitBenposFile() {
     if (fnValidateBenposHdr()) {
         fnAddUpdateBenposHdr();
     }
+}
+function fnDownloadBenpos(BenposId) {
+    var webUrl = uri + "/api/Benpos/GetBenposFile?BenposId=" + BenposId;
+    $.ajax({
+        url: webUrl,
+        type: 'GET',
+        headers: {
+            Accept: "application/vnd.ms-excel; base64",
+        },
+        success: function (data) {
+            var uri = 'data:application/vnd.ms-excel;base64,' + data;
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = "ExcelReport.xlsx";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function () {
+            console.log('error Occured while Downloading CSV file.');
+        },
+    });
 }
 function fnValidateBenposHdr() {
     var count = 0;
@@ -267,6 +290,7 @@ function fnAddUpdateBenposHdr() {
     $("#Loader").show();
     var filesData = new FormData();
     var document = $("#fileUploadImage").get(0).files[0].name;
+    var documentSize = $("#file").get(0).files[0].size;
     var documentESOP = "";
     if ($("#fileUploadImageESOP").get(0).files.length > 0) {
         documentESOP = $("#fileUploadImageESOP").get(0).files[0].name;
@@ -291,6 +315,7 @@ function fnAddUpdateBenposHdr() {
         fileName: document,
         fileNameESOP: documentESOP
     }));
+    filesData.append("FileSize", documentSize);
     filesData.append("FilesBenpos", $("#fileUploadImage").get(0).files[0]);
     filesData.append("FilesESOP", $("#fileUploadImageESOP").get(0).files[0]);
     var webUrl = uri + "/api/Benpos/SaveBenposHdr";

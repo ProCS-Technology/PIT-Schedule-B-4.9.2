@@ -149,13 +149,26 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 List<PreClearanceRequest> pClR = new JavaScriptSerializer().Deserialize<List<PreClearanceRequest>>(input);
                 PreClearanceRequestResponse gResPClRX = new PreClearanceRequestResponse();
                 List<PreClearanceRequest> lstPClr = pClR.OrderBy(x => FormatHelper.FormatDate(x.ActualTransactionDate)).ToList();
+
                 foreach (PreClearanceRequest p in lstPClr)
                 {
                     p.CompanyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
                     p.LoginId = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
                     p.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
                     p.TradeCompany = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
-
+                    if (!p.ValidateInput())
+                    {
+                        gResPClRX.StatusFl = false;
+                        gResPClRX.Msg = sXSSErrMsg;
+                        return gResPClRX;
+                    }
+                }
+                foreach (PreClearanceRequest p in lstPClr)
+                {
+                    p.CompanyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                    p.LoginId = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
+                    p.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
+                    p.TradeCompany = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
                     PreClearanceRequestRequest gReqPClR = new PreClearanceRequestRequest(p);
                     PreClearanceRequestResponse gResPClR = gReqPClR.AddBrokerNoteWithNoPC();
                 }

@@ -628,26 +628,36 @@ namespace ProcsDLL.Controllers.InsiderTrading
                         String ext = Path.GetExtension(file.FileName);
                         string sNm = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "BrokerNote_" + pClR.PreClearanceRequestId;//Path.GetFileNameWithoutExtension(file.FileName);
-
-                        if (sNm.Contains("%00"))
+                        string sContentTyp = file.ContentType;
+                        if (sContentTyp.ToUpper() == "APPLICATION/PDF")
                         {
-                            PreClearanceRequestResponse objResponse = new PreClearanceRequestResponse();
-                            objResponse.StatusFl = false;
-                            objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
-                            return objResponse;
-                        }
-                        if (ext.ToLower() == ".pdf")
-                        {
-                            newFileName = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + userDir), newFileName);
-                            file.SaveAs(sSaveAs);
-                            pClR.BrokerNote = newFileName;
+                            if (sNm.Contains("%00"))
+                            {
+                                PreClearanceRequestResponse objResponse = new PreClearanceRequestResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                                return objResponse;
+                            }
+                            if (ext.ToLower() == ".pdf")
+                            {
+                                newFileName = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + userDir), newFileName);
+                                file.SaveAs(sSaveAs);
+                                pClR.BrokerNote = newFileName;
+                            }
+                            else
+                            {
+                                PreClearanceRequestResponse objResponse = new PreClearanceRequestResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Only pdf attachement is allowed";
+                                return objResponse;
+                            }
                         }
                         else
                         {
                             PreClearanceRequestResponse objResponse = new PreClearanceRequestResponse();
                             objResponse.StatusFl = false;
-                            objResponse.Msg = "Only pdf attachement is allowed";
+                            objResponse.Msg = "Content type of the uploaded document does not matched with the permissible document";
                             return objResponse;
                         }
                     }
@@ -1608,25 +1618,21 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     p.LoginId = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
                     p.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
                     p.TradeCompany = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                    if (!p.ValidateInput())
+                    {
+                        gResPClRX.StatusFl = false;
+                        gResPClRX.Msg = sXSSErrMsg;
+                        return gResPClRX;
+                    }
+                }
 
+                foreach (PreClearanceRequest p in pClR)
+                {
+                    p.CompanyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+                    p.LoginId = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
+                    p.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
+                    p.TradeCompany = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
                     PreClearanceRequestRequest gReqPClR = new PreClearanceRequestRequest(p);
-                    //if (!p.isNUllTrade)
-                    //{
-                    //    if (gReqPClR.ValidateTradeDateLiesInTradingWindowClosureBrokerNote())
-                    //    {
-                    //        PreClearanceRequestResponse objResponse = new PreClearanceRequestResponse();
-                    //        objResponse.StatusFl = false;
-                    //        objResponse.Msg = "Actual Transaction Date cannot be within the Trading Window Closure.";
-                    //        return objResponse;
-                    //    }
-                    //    if (gReqPClR.ValidateTradeDateFallsInHolidayListBrokerNote())
-                    //    {
-                    //        PreClearanceRequestResponse objResponse = new PreClearanceRequestResponse();
-                    //        objResponse.StatusFl = false;
-                    //        objResponse.Msg = "Actual Transaction Date Date cannot fall in market closed date.";
-                    //        return objResponse;
-                    //    }
-                    //}
                     PreClearanceRequestResponse gResPClR = gReqPClR.AddBrokerNoteWithNoPC();
                 }
                 gResPClRX.StatusFl = true;
@@ -1666,11 +1672,15 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 pClR.ADMIN_DATABASE = Convert.ToString(HttpContext.Current.Session["AdminDB"]);
                 pClR.TradeCompany = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
 
+                if (!pClR.ValidateInput())
+                {
+                    TradeTransactionResponse gResPClR1 = new TradeTransactionResponse();
+                    gResPClR1.StatusFl = false;
+                    gResPClR1.Msg = sXSSErrMsg;
+                    return gResPClR1;
+                }
                 PreClearanceRequestRequest gReqPClR = new PreClearanceRequestRequest(pClR);
                 TradeTransactionResponse gResPClR = gReqPClR.GetTradeTransactions();
-
-                //gResPClRX.StatusFl = true;
-                //gResPClRX.Msg = "Data saved successfully";
                 return gResPClR;
             }
             catch (Exception ex)

@@ -1,21 +1,16 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/InsiderTrading/InsiderTradingMaster.Master" CodeBehind="RestrictedCompanies.aspx.cs" Inherits="ProcsDLL.InsiderTrading.RestrictedCompanies" %>
-
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
-    <%--Start Datetime--%>
     <link href="../assets/global/css/components.min.css" rel="stylesheet" />
     <link href="../assets/global/css/plugins.min.css" rel="stylesheet" />
     <link href="../assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
     <link href="../assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" />
     <link href="../assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" />
     <link href="../assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" />
-    <%--End Datetime--%>
     <link href="../assets/global/plugins/datatables/datatables.min.css" rel="stylesheet" type="text/css" />
     <link href="../assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css" rel="stylesheet" type="text/css" />
     <link href="../assets/global/plugins/datatables/datatables.min.css" rel="stylesheet" type="text/css" />
     <link href="../assets/global/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
     <link href="../assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <%--<link href="../assets/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css" rel="stylesheet" type="text/css" />
-    <link href="../assets/global/plugins/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css" />--%>
     <link href="stylesheets/RestrictedCompanies.css" rel="stylesheet" type="text/css" />
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
@@ -46,7 +41,6 @@
                         <table class="table table-striped table-hover table-bordered" id="tbl-Designation-setup">
                             <thead>
                                 <tr class="text-capitalize">
-                                    <%-- <th style="display:none">DESIGNATION ID</th>--%>
                                     <th class="no-sort"><input type="checkbox" id="chkParent" /></th>
                                     <th>Company Name</th>
                                     <th>Company ABRR</th>
@@ -177,33 +171,19 @@
                     <button type="button" data-dismiss="modal" class="btn default" onclick="javascript:fnCloseModal();">Close</button>
                 </div>
             </div>
-            <!-- /.modal-content -->
         </div>
-        <!-- /.modal-dialog -->
     </div>
-    <%--Start Datetime--%>
     <script src="../assets/editor/jquery-te-1.4.0.min.js"></script>
     <script src="../assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
     <script src="../assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js"></script>
     <script src="../assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
     <script src="../assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
     <script src="../assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
-    <%-- <script src="../assets/global/scripts/app.min.js" type="text/javascript"></script>--%>
-    <%--End Datetime--%>
     <script src="../assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="../assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
-
     <script src="../assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-
-
-
-
     <script src="../assets/global/scripts/app.min.js" type="text/javascript"></script>
-
-
-    <%--<script src="../assets/pages/scripts/table-datatables-buttons.min.js" type="text/javascript"></script>--%>
     <script src="../assets/global/plugins/select2/js/select2.min.js" type="text/javascript"></script>
-
     <script src="../assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
     <script src="../assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
     <script src="../assets/global/plugins/jquery-validation/js/additional-methods.min.js" type="text/javascript"></script>

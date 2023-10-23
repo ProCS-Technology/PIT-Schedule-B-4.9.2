@@ -1423,6 +1423,20 @@ function ConvertToDateTime(dateTime) {
 }
 function fnGetPolicy() {
     //alert("In getpolicy");
+    //$("#Loader").show();
+    //var webUrl = uri + "/api/Policy/GetPolicy";
+    var policyDoc = uri;//+"/assets/logos/Policy/" + msg.PolicyList[0].DOCUMENT;
+    //alert("policyDoc=" + policyDoc);
+    var webUrl = uri + "/api/PdfViewerIT";
+    $("#viewer").ejPdfViewer({
+        serviceUrl: webUrl,
+        //documentPath: policyDoc,
+        enableStrikethroughAnnotation: false,
+        toolbarSettings: { showTooltip: false }
+    });
+}
+/*function fnGetPolicy() {
+    //alert("In getpolicy");
     $("#Loader").show();
     var webUrl = uri + "/api/Policy/GetPolicy";
     $.ajax({
@@ -1461,16 +1475,16 @@ function fnGetPolicy() {
                     toolbarSettings: { showTooltip: false }
                 });
 
-                var pdfViewer = $('#viewer').data('ejPdfViewer');
-                pdfViewer.load("../assets/logos/Policy/" + msg.PolicyList[0].DOCUMENT);
-                /*var pdfViewer = $('#viewer').data('ejPdfViewer');
-                        pdfViewer.showSelectionTool(false);
-                        pdfViewer.showPrintTools(false);
-                        pdfViewer.showDownloadTool(false);
-                        pdfViewer.showSignatureTool(false);
-                        pdfViewer.showTextMarkupAnnotationTools(false);
-                        pdfViewer.showMagnificationTools(false);
-                        pdfViewer.model.enableTextSelection = false;*/
+                //var pdfViewer = $('#viewer').data('ejPdfViewer');
+                //pdfViewer.load("../assets/logos/Policy/" + msg.PolicyList[0].DOCUMENT);
+                //var pdfViewer = $('#viewer').data('ejPdfViewer');
+                //        pdfViewer.showSelectionTool(false);
+                //        pdfViewer.showPrintTools(false);
+                //        pdfViewer.showDownloadTool(false);
+                //        pdfViewer.showSignatureTool(false);
+                //        pdfViewer.showTextMarkupAnnotationTools(false);
+                //        pdfViewer.showMagnificationTools(false);
+                //        pdfViewer.model.enableTextSelection = false;
 
 
 
@@ -1494,7 +1508,7 @@ function fnGetPolicy() {
             alert(error.status + ' ' + error.statusText);
         }
     })
-}
+}*/
 function fnCloseModalEducationAndProfessionalDetails() {
     fnClearFormModalEducationalAndProfessionalDetails();
 }

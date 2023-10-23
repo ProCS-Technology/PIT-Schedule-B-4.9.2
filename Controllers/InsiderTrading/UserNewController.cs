@@ -41,11 +41,8 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 String sSaveAs = String.Empty;
                 String sSaveAs1 = String.Empty;
                 String input = HttpContext.Current.Request.Form["Object"];
-                //string input1 = string.Empty;
-                //using (System.IO.StreamReader sr = new System.IO.StreamReader(HttpContext.Current.Request.InputStream))
-                //{
-                //input = sr.ReadToEnd();
-                //}
+                String sFileSize = HttpContext.Current.Request.Form["FileSize"];
+
                 UserNewHeader rel = new JavaScriptSerializer().Deserialize<UserNewHeader>(input);
                 rel.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
                 rel.createdBy = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
@@ -66,35 +63,50 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     for (int i = 0; i < files.Count; i++)
                     {
                         HttpPostedFile file = files[i];
+                        int cLength = file.ContentLength;
                         String ext = Path.GetExtension(file.FileName);
-                        //String name = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "UserBulk_";
                         string fname;
+                        string sNm = Path.GetFileNameWithoutExtension(file.FileName);
 
-                        if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                        string sContentTyp = file.ContentType;
+                        if (sContentTyp.ToUpper() == "APPLICATION/VND.MS-EXCEL" || sContentTyp.ToUpper() == "APPLICATION/VND.OPENXMLFORMATS-OFFICEDOCUMENT.SPREADSHEETML.SHEET")
                         {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UserBulkUpload/"), fname);
-                            file.SaveAs(sSaveAs);
+                            if (sFileSize != cLength.ToString())
+                            {
+                                UserNewResponse objResponse = new UserNewResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document is corrupt, please upload correct the one.";
+                                return objResponse;
+                            }
+                            if (sNm.Contains("%00"))
+                            {
+                                UserNewResponse objResponse = new UserNewResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                                return objResponse;
+                            }
+                            if (ext.ToLower() == ".xls" || ext.ToLower() == ".xlsx")
+                            {
+                                fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UserBulkUpload/"), fname);
+                                file.SaveAs(sSaveAs);
+                            }
+                            else
+                            {
+                                UserNewResponse objResponse = new UserNewResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                                return objResponse;
+                            }
                         }
                         else
                         {
                             UserNewResponse objResponse = new UserNewResponse();
                             objResponse.StatusFl = false;
-                            objResponse.Msg = "Only xls or xlsx attachement is allowed";
+                            objResponse.Msg = "Content type of the uploaded document does not matched with the permissible document";
                             return objResponse;
                         }
-                        /*if (HttpContext.Current.Request.Browser.Browser.ToUpper() == "IE" || HttpContext.Current.Request.Browser.Browser.ToUpper() == "INTERNETEXPLORER")
-                        {
-                            string[] testfiles = file.FileName.Split(new char[] { '\\' });
-                            fname = Path.GetFileNameWithoutExtension(testfiles[testfiles.Length - 1]) + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                        }
-                        else
-                        {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                        }
-                        sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/InsiderTrading/UserBulkUpload/"), fname);*/
-
                         if (!Directory.Exists(HttpContext.Current.Server.MapPath("~/InsiderTrading/UserBulkUpload/")))
                         {
                             Directory.CreateDirectory(HttpContext.Current.Server.MapPath("~/InsiderTrading/UserBulkUpload/"));

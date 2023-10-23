@@ -546,10 +546,7 @@ function fnGetTypeOfSecurity() {
                     obj.Id = msg.SecurityTypeList[i].Id;
                     obj.Nm = msg.SecurityTypeList[i].Name;
                     arrSecType.push(obj);
-
-                    if (msg.SecurityTypeList[i].Name == "Equity") {
-                        result2 += "<option value='" + msg.SecurityTypeList[i].Id + "'>" + msg.SecurityTypeList[i].Name + "</option>";
-                    }
+                    result2 += "<option value='" + msg.SecurityTypeList[i].Id + "'>" + msg.SecurityTypeList[i].Name + "</option>";
                     result += "<option value='" + msg.SecurityTypeList[i].Id + "'>" + msg.SecurityTypeList[i].Name + "</option>";
                 }
                 $("#ddlTypeOfSecurity").append(result2);
@@ -2279,7 +2276,6 @@ function fnSubmitBrokerNote() {
         $("#Loader").hide();
         return false;
     }
-
     test.append("Object", JSON.stringify({ PreClearanceRequestId: preClearanceRequestId, BrokerNote: brokerNote, ActualTransactionDate: actualTransactionDate, ValuePerShare: valuePerShare, TotalAmount: totalAmount, TradeQuantity: tradeQuantity, ActualTradeQuantity: actualTradeQuantity, Status: status, TradeExchange: tradeExchange, DematAccount: dematAccountID, remarks: remarks, exchangeTradedOn: exchangeTradedOn, lstMultiTrade: MulTiTradeList, BrokerDetails: brokerdetails }));
     test.append("Files", $("#btnBrokernote").get(0).files[0]);
 

@@ -308,7 +308,7 @@ function fnGetUPSIMessage(taskid) {
                 $("#dvUPSITaskMSGTo").html(msg.Dashboard.listUPSITask[0].EmailTo);
                 $("#dvUPSITaskMSGCC").html(msg.Dashboard.listUPSITask[0].EmailCC);
                 $("#dvUPSITaskMsgDate").html(msg.Dashboard.listUPSITask[0].EmailDate);
-                $("#dvUPSITaskMsgSubject").html(msg.Dashboard.listUPSITask[0].EmailSubject);                
+                $("#dvUPSITaskMsgSubject").html(msg.Dashboard.listUPSITask[0].EmailSubject);
                 $("#dvAttechmentlistMsg").html('');
 
                 if (msg.Dashboard.listUPSITask[0].Group_id == "Subject") {
@@ -331,24 +331,16 @@ function fnGetUPSIMessage(taskid) {
                     $("#dvMessageHdr").show();
                     $("#dvAttachmentHdr").show();
                 }
-                
-
                 var result = "";
                 for (var i = 0; i < msg.Dashboard.listUPSITask[0].listAttachment.length; i++) {
-
                     result += '<p>';
                     result += '<a href="UPSI/' + msg.Dashboard.listUPSITask[0].listAttachment[i].Attachment + '" target="_blank">' + msg.Dashboard.listUPSITask[0].listAttachment[i].Attachment + '</a>';
                     result += '</p>';
                 }
-
                 $("#dvAttechmentlistMsg").html(result);
-
             }
             else {
-                // alert(msg.Msg);
-
             }
-
         },
         error: function (response) {
             $("#Loader").hide();
@@ -361,10 +353,7 @@ function fnGetUPSIMessage(taskid) {
             else {
                 alert(response.status + ' ' + response.statusText);
             }
-
         }
-
-
     });
 }
 function fnCloseUPSITask() {

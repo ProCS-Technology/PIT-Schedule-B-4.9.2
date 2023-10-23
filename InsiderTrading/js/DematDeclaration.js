@@ -1,7 +1,5 @@
 ﻿function saveDematAccounts() {
-
     var allowNext = true;//when selected not applicable
-
     var personalInformation = new PersonalInformation();
     for (var index = 0; index < $("#tbdDematList").children().length; index++) {
         var obj = new DematAccount();
@@ -454,9 +452,9 @@ function fnAddDematDetail() {
             str += '<td style="display:none;">' + obj.ID + '</td>';
             str += '<td style="display:none;">' + relative.ID + '</td>';
             str += '<td>' + relative.relativeName + '</td>';
-            str += '<td>' + obj.depositoryName + '</td>';
+            str += '<td>' + encodeHTMLEntities(obj.depositoryName) + '</td>';
             str += '<td>' + obj.clientId + '</td>';
-            str += '<td>' + obj.depositoryParticipantName + '</td>';
+            str += '<td>' + encodeHTMLEntities(obj.depositoryParticipantName) + '</td>';
             str += '<td>' + obj.depositoryParticipantId + '</td>';
             str += '<td style="display:none;">' + obj.tradingMemberId + '</td>';
             str += '<td>' + obj.accountNo + '</td>';
@@ -477,7 +475,7 @@ function fnAddDematDetail() {
             $(editableElementDemat[2]).html(relative.relativeName);
             $(editableElementDemat[3]).html(obj.depositoryName);
             $(editableElementDemat[4]).html(obj.clientId);
-            $(editableElementDemat[5]).html(obj.depositoryParticipantName);
+            $(editableElementDemat[5]).html(encodeHTMLEntities(obj.depositoryParticipantName));
             $(editableElementDemat[6]).html(obj.depositoryParticipantId);
             $(editableElementDemat[7]).html(obj.tradingMemberId);
             $(editableElementDemat[8]).html(obj.accountNo);

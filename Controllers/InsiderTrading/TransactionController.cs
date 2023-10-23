@@ -65,13 +65,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     user.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
                     user.ADMIN_DATABASE = Convert.ToString(HttpContext.Current.Session["AdminDb"]);
                     user.remarks = sReason;
-                    //if (!user.ValidateInput())
-                    //{
-                    //    UserResponse objResponse = new UserResponse();
-                    //    objResponse.StatusFl = false;
-                    //    objResponse.Msg = "Invalid Input Format";
-                    //    return objResponse;
-                    //}
+                    if (!user.ValidateInput())
+                    {
+                        UserResponse objResponse = new UserResponse();
+                        objResponse.StatusFl = false;
+                        objResponse.Msg = sXSSErrMsg;
+                        return objResponse;
+                    }
                     UserRequest userRequest = new UserRequest(user);
                     UserResponse userResponse = userRequest.SaveModifyRequest();
                     return userResponse;

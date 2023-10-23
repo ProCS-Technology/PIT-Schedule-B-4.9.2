@@ -20,6 +20,7 @@ $(document).ready(function () {
     });
 
     var start = $("input[id*=hdnEmailTask]").val();
+    //alert("start=" + start);
     if (start == "Start") {
         $("#LoaderProgerss").show();
         intervalListener = window.setInterval(function () {
@@ -34,6 +35,29 @@ $(document).ready(function () {
     else if (start == "FileError") {
         alert("Please upload only pdf format");
     }
+    else if (start == "Content type of the uploaded document does not matched with the permissible document") {
+        alert("Content type of the uploaded document does not matched with the permissible document");
+    }
+
+    //$('.summernote').summernote({
+    //    toolbar: [
+    //        ['style', ['style']],
+    //        ['font', ['bold', 'italic', 'underline', 'clear']],
+    //        ['fontname', ['fontname']],
+    //        ['color', ['color']],
+    //        ['para', ['ul', 'ol', 'paragraph']],
+    //        ['height', ['height']],
+    //        ['table', ['table']],
+    //        ['insert', ['link', 'hr']],
+    //        ['view', ['fullscreen', 'codeview']],
+    //        ['help', ['help']]
+    //    ],
+    //    height: 260
+    //});
+    //$('.summernote').on("summernote.enter", function (we, e) {
+    //    $(this).summernote("pasteHTML", "<br><br>");
+    //    e.preventDefault();
+    //});
 });
 function isJson(str) {
     try {
@@ -211,6 +235,17 @@ function fnSendMailTradingWindow(tradingWindowId) {
             if (lstClosure[x].id == tradingWindowId) {
                 $("#txtTWCId").val(tradingWindowId);
                 $('#summernote_1').summernote('code', lstClosure[x].EmailTemplate);
+                $('#summernote_1').on("summernote.enter", function (we, e) {
+                    $(this).summernote("pasteHTML", "<br><br>");
+                    e.preventDefault();
+                });
+                //$('#summernote_1').summernote({
+                //    callbacks: {
+                //        onChange: function (contents, $editable) {
+                //            alert($editable);
+                //        }
+                //    }
+                //});
                 $(tradingWindowClosureMail).modal();
             }
         }

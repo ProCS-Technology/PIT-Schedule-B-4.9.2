@@ -72,7 +72,8 @@ function fnGetAllPolicyDocuments() {
                     str += '<td>' + FormatDate(msg.PolicyList[index].CREATED_DATE, $("input[id*=hdnDateFormat]").val()) + '</td>';
                     str += '<td>' + msg.PolicyList[index].CREATED_BY + '</td>';
                     str += '<td>' + msg.PolicyList[index].DOCUMENT + '</td>';
-                    str += '<td><a class="fa fa-download" target="_blank" href="../assets/logos/Policy/' + msg.PolicyList[index].DOCUMENT + '"></a></td>';
+                    //str += '<td><a class="fa fa-download" target="_blank" href="../assets/logos/Policy/' + msg.PolicyList[index].DOCUMENT + '"></a></td>';
+                    str += '<td><a class="fa fa-download" onclick=\'javascript:fnDownloadPolicy("' + msg.PolicyList[index].POLICY_ID + '");\'></a></td>';
                     str += '</tr>';
                 }
                 $("#tbdPolicyDocumentList").html(str);
@@ -84,11 +85,36 @@ function fnGetAllPolicyDocuments() {
         }
     })
 }
+function fnDownloadPolicy(PolicyId) {
+    var webUrl = uri + "/api/Policy/GetPolicyFile?PolicyId=" + PolicyId;
+    $.ajax({
+        url: webUrl,
+        type: 'GET',
+        headers: {
+            Accept: "application/vnd.ms-excel; base64",
+        },
+        success: function (data) {
+            var uri = 'data:application/vnd.ms-excel;base64,' + data;
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = "Policy.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function () {
+            console.log('error Occured while Downloading CSV file.');
+        },
+    });
+}
 function fnAddUpdatePolicy() {
     $("#Loader").show();
 
     var filesData = new FormData();
     var document = $("#file").get(0).files[0].name;
+    var documentSize = $("#file").get(0).files[0].size;
+    //alert($("#file").get(0).files[0].size);
     var PolicyID = $('#txtPolicyKey').val();
 
     if (PolicyID === "") {
@@ -96,6 +122,7 @@ function fnAddUpdatePolicy() {
     }
 
     filesData.append("Object", JSON.stringify({ POLICY_ID: PolicyID, DOCUMENT: document }));
+    filesData.append("FileSize", documentSize);
     filesData.append("Files", $("#file").get(0).files[0]);
     var webUrl = uri + "/api/Policy/SavePolicy";
     $.ajax({
@@ -137,11 +164,11 @@ function fnValidate() {
     if (itemFile.length == 0) {
         alert("No file chosen to upload document")
     }
-    var arrayExtensions = ["pdf"];
-    if ($.inArray(itemFile[0].name.split('.').pop().toLowerCase(), arrayExtensions) == -1) {
-        alert("Only pdf format is allowed in Policy Document.");
-        return false;
-    }
+    //var arrayExtensions = ["pdf"];
+    //if ($.inArray(itemFile[0].name.split('.').pop().toLowerCase(), arrayExtensions) == -1) {
+    //    alert("Only pdf format is allowed in Policy Document.");
+    //    return false;
+    //}
     return true;
 }
 function ConvertToDateTime(dateTime) {

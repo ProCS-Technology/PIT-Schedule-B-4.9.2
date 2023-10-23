@@ -268,6 +268,7 @@ function fnUploadCP() {
     var param1 = new Date();
     var param2 = param1.getDate() + '_' + (param1.getMonth() + 1) + '_' + param1.getFullYear() + '_' + param1.getHours() + '_' + param1.getMinutes() + '_' + param1.getSeconds();
     var fileUpload = $("#fuCPUploadFile").get(0);
+    var documentSize = $("#fuCPUploadFile").get(0).files[0].size;
     var files = fileUpload.files;
     var test = new FormData();
     for (var i = 0; i < files.length; i++) {
@@ -277,7 +278,7 @@ function fnUploadCP() {
     extn = extn[extn.length - 1].toLowerCase();
     var sSaveAs = 'Upload_' + param2 + '_File.' + extn;
     test.append('sSaveAs', sSaveAs);
-
+    test.append("FileSize", documentSize);
     var webUrl = uri + "/api/ConnectedPerson/UploadCP";
     $("#Loader").show();
     $.ajax({

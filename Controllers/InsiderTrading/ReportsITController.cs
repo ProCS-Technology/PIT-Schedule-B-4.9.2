@@ -697,6 +697,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objUser.companyId = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
                 objUser.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
 
+                if (!objUser.ValidateInput())
+                {
+                    objResponse.StatusFl = false;
+                    objResponse.Msg = sXSSErrMsg;
+                    return objResponse;
+                }
+
                 if (objUser.emailReport.Count > 0)
                 {
                     string toemailId = string.Empty;

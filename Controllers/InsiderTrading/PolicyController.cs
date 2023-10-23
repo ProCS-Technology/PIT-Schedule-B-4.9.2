@@ -9,6 +9,13 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Script.Serialization;
 using System.Configuration;
+using System.Net.Http;
+using ProcsDLL.Models.Infrastructure;
+using System.Data.SqlClient;
+using System.Data;
+using System.Net.Http.Headers;
+using System.Net;
+
 namespace ProcsDLL.Controllers.InsiderTrading
 {
     [RoutePrefix("api/Policy")]
@@ -147,6 +154,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     return objResponse;
                 }
                 String input = HttpContext.Current.Request.Form["Object"];
+                String sFileSize = HttpContext.Current.Request.Form["FileSize"];
                 Policy rel = new JavaScriptSerializer().Deserialize<Policy>(input);
                 if (HttpContext.Current.Request.Files.Count > 0)
                 {
@@ -155,33 +163,51 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     for (int i = 0; i < files.Count; i++)
                     {
                         HttpPostedFile file = files[i];
+                        int cLength = file.ContentLength;
+                        
                         String ext = Path.GetExtension(file.FileName);
                         string sNm = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "Policy_";
                         string fname;
 
-                        if(sNm.Contains("%00"))
+                        string sContentTyp = file.ContentType;
+                        if (sContentTyp.ToUpper() == "APPLICATION/PDF")
                         {
-                            PolicyResponse objResponse = new PolicyResponse();
-                            objResponse.StatusFl = false;
-                            objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
-                            return objResponse;
-                        }
-
-                        if (ext.ToLower() == ".pdf")
-                        {
-                            fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
-                            sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/assets/logos/Policy/"), fname);
-                            file.SaveAs(sSaveAs);
+                            if (sFileSize!=cLength.ToString())
+                            {
+                                PolicyResponse objResponse = new PolicyResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document is corrupt, please upload correct the one.";
+                                return objResponse;
+                            }
+                            if (sNm.Contains("%00"))
+                            {
+                                PolicyResponse objResponse = new PolicyResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Uploaded document contains nullbyte, please correct the name and try again.";
+                                return objResponse;
+                            }
+                            if (ext.ToLower() == ".pdf")
+                            {
+                                fname = name + "_" + DateTime.UtcNow.ToString("yyyy MM dd HH mm ss fff", CultureInfo.InvariantCulture) + ext;
+                                sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~/assets/logos/Policy/"), fname);
+                                file.SaveAs(sSaveAs);
+                            }
+                            else
+                            {
+                                PolicyResponse objResponse = new PolicyResponse();
+                                objResponse.StatusFl = false;
+                                objResponse.Msg = "Only pdf format is allowed in Policy Document";
+                                return objResponse;
+                            }
                         }
                         else
                         {
                             PolicyResponse objResponse = new PolicyResponse();
                             objResponse.StatusFl = false;
-                            objResponse.Msg = "Only pdf format is allowed in Policy Document";
+                            objResponse.Msg = "Content type of the uploaded document does not matched with the permissible document";
                             return objResponse;
                         }
-
                         //if (HttpContext.Current.Request.Browser.Browser.ToUpper() == "IE" || HttpContext.Current.Request.Browser.Browser.ToUpper() == "INTERNETEXPLORER")
                         //{
                         //    string[] testfiles = file.FileName.Split(new char[] { '\\' });
@@ -231,8 +257,61 @@ namespace ProcsDLL.Controllers.InsiderTrading
             {
                 PolicyResponse objResponse = new PolicyResponse();
                 objResponse.StatusFl = false;
-                objResponse.Msg = ex.Message;
+                objResponse.Msg = "Processing failed because of system error !";
                 return objResponse;
+            }
+        }
+        [Route("GetESOPFile")]
+        [HttpGet]
+        [SwaggerOperation(Tags = new[] { "Benpos APIs" })]
+        public HttpResponseMessage GetPolicyFile()
+        {
+            try
+            {
+                //if (HttpContext.Current.Session.Count == 0)
+                //{
+                //    BenposResponse objResponse = new BenposResponse();
+                //    objResponse.StatusFl = false;
+                //    objResponse.Msg = "SessionExpired";
+                //    return objResponse;
+                //}
+
+                string sPolicyId = Convert.ToString(HttpContext.Current.Request.QueryString["PolicyId"]);
+                string str = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["ConnectionStringIT"]), true);
+                string sFileNm = "";
+
+                using (SqlConnection sCon = new SqlConnection(str))
+                {
+                    SqlCommand sCmd = new SqlCommand();
+                    sCmd.Connection = sCon;
+                    sCmd.CommandType = CommandType.Text;
+                    sCon.Open();
+                    sCmd.CommandText = "SELECT DOCUMENT FROM PROCS_INSIDER_POLICY_MSTR_ARCHIVE(NOLOCK) WHERE ID=" + sPolicyId;
+                    sFileNm = Convert.ToString(sCmd.ExecuteScalar());
+                }
+                string sFile = Path.Combine(HttpContext.Current.Server.MapPath("~/assets/logos/Policy/"), sFileNm);
+
+                byte[] fileBook = File.ReadAllBytes(sFile);// tempPathExcelFile);
+                MemoryStream stream = new MemoryStream();
+                string excelBase64String = Convert.ToBase64String(fileBook);
+                StreamWriter excelWriter = new StreamWriter(stream);
+                excelWriter.Write(excelBase64String);
+                excelWriter.Flush();
+                stream.Position = 0;
+                HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+                httpResponseMessage.Content = new StreamContent(stream);
+                httpResponseMessage.Content.Headers.Add("x-filename", "Policy.pdf");
+                httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+                httpResponseMessage.Content.Headers.ContentDisposition =
+                    new ContentDispositionHeaderValue("attachment");
+                httpResponseMessage.Content.Headers.ContentDisposition.FileName = "Policy.pdf";
+                httpResponseMessage.StatusCode = HttpStatusCode.OK;
+                return httpResponseMessage;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                //return ReturnError(ErrorType.Error, errorMessage);
             }
         }
     }
