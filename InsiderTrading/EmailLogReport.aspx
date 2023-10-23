@@ -131,8 +131,7 @@
                                                     <td><%#Eval("EMAIL_STATUS") %></td>
                                                     <td style="display: none"><%#Eval("LOG_ID") %></td>
                                                     <td>
-                                                        <input type="checkbox" id="CheckBoxSelect" class="rowCheckbox" data-status='<%#Eval("EMAIL_STATUS") %>' data-log-id='<%#Eval("LOG_ID") %>' <%# (string)Eval("EMAIL_STATUS") == "Success" ? "disabled='disabled'" : "" %> /></td>
-                                                    
+                                                        <input type="checkbox" id="CheckBoxSelect" class="rowCheckbox" data-status='<%#Eval("EMAIL_STATUS") %>' data-log-id='<%#Eval("LOG_ID") %>' <%# (string)Eval("EMAIL_STATUS") == "Success" ? "disabled='disabled'" : "" %> /></td>                                                    
                                                     <td style="display:none"></td>
                                                     <td>
                                                         <asp:HiddenField ID="HiddenFieldLogId" runat="server" Value='<%#Eval("LOG_ID") %>' />
@@ -193,7 +192,7 @@
                 <asp:PostBackTrigger ControlID="btnReSendMail" />
             </Triggers>
         </asp:UpdatePanel>
-
+        <%--<h1>sumit</h1>--%>
     </form>
 
     <%--Start Datetime--%>
@@ -222,8 +221,7 @@
     <script src="../assets/plugins/custom/ckeditor/ckeditor-mention.js" type="text/javascript"></script>
     <script src="js/Global.js?<%=DateTime.Now %>" type="text/javascript"></script>
     <script>
-        $(document).ready(function () {
-            debugger;
+        $(document).ready(function () {           
             $("#Loader").hide();
             if ($("input[id*='HiddenShowModal']").val() == "YES") {
                 $('#ModalFullAuditLog').modal('show');
@@ -236,21 +234,19 @@
 
         });
         function initializeDataTable() {
-            debugger;
             $('#tblReport').DataTable({
                 dom: 'Bfrtip',
                 pageLength: 10,
                 "scrollY": "300px",
                 //"scrollX": true,
                 //"aaSorting": [[0, "desc"]],
-                buttons: [
+                buttons: ['pageLength',
                     {
                         extend: 'pdf',
                         className: 'btn green btn-outline',
                         exportOptions: {
                             columns: [1, 2, 3, 4, 5, 6, 7]
                         }
-
                     },
                     {
                         extend: 'excel',
@@ -258,10 +254,9 @@
                         exportOptions: {
                             columns: [1, 2, 3, 4, 5, 6, 7]
                         }
-
                     },
-
-                ]
+                ],
+                "lengthMenu": [10, 25, 50, 100, 500, 1000, 2000],
             });
         }
 
@@ -269,8 +264,45 @@
             alert("Please enter required field.");
         }
 
-        function selectAllRows() {
-            debugger;
+        <%--function selectAllRows() {
+            debugger
+            var headerCheckbox = document.getElementById('chkSelectAll');
+            var rowCheckboxes = document.getElementsByClassName('rowCheckbox');
+            var selectedLogIds = []; // Array to store selected LOG_ID values
+
+            for (var i = 0; i < rowCheckboxes.length; i++) {
+                var dataStatus = rowCheckboxes[i].getAttribute('data-status');
+                var logId = rowCheckboxes[i].getAttribute('data-log-id');
+                var isRowChecked = rowCheckboxes[i].checked;
+
+                if (headerCheckbox.checked || (isRowChecked && dataStatus === 'Failed')) {
+                    // If the header checkbox is checked, or the row checkbox is checked and it's a failed status
+                    rowCheckboxes[i].checked = true;
+                    selectedLogIds.push(logId); // Add the LOG_ID to the array
+                }
+                else {
+                    rowCheckboxes[i].checked = false;
+
+                    // Update the row checkbox's disabled status
+                    if (dataStatus === 'Success' && (headerCheckbox.checked || isRowChecked)) {
+                        rowCheckboxes[i].disabled = true; // Disable "Success" status rows
+                    } else {
+                        rowCheckboxes[i].disabled = false; // Enable other rows
+                    }
+                }
+            }
+
+            // Set the selectedLogIds array as a comma-separated string
+            var selectedLogIdsStr = selectedLogIds.join(',');
+            // Set the value of the HiddenField control with the selectedLogIds
+            var hiddenField = document.getElementById('<%= HiddenFieldLogIds.ClientID %>');
+            if (hiddenField) {
+                hiddenField.value = selectedLogIdsStr;
+            }
+        }--%>
+
+
+       function selectAllRows() {
             var headerCheckbox = document.getElementById('chkSelectAll');
             var rowCheckboxes = document.getElementsByClassName('rowCheckbox');
             var selectedLogIds = []; // Array to store selected LOG_ID values
@@ -299,10 +331,9 @@
                 hiddenField.value = selectedLogIdsStr;
             }
 
-        }
+       }
 
 
-        debugger;
         var downloadComplete = false;
         var intervalListener;
 
@@ -324,7 +355,6 @@
 
 
         function fnChkStatus() {
-            debugger;
             var start = $("input[id*=hdnEmailTask]").val();
             if (start == "Start") {
                 $("#LoaderProgerss").show();
@@ -336,7 +366,6 @@
             }
         }
         function CallCheckEmailStatus() {
-            debugger;
             $.ajax({
                 type: "POST",
                 url: "EmailLogReport.aspx/CheckDownload",
@@ -362,7 +391,6 @@
             }
         }
         function updateStatus(status, msg) {
-            debugger;
             document.getElementById('lblMsg').innerHTML = msg;
             if (msg.indexOf('All emails sent') > -1) {
                 downloadComplete = true;
@@ -372,7 +400,6 @@
                 alert("Custom Email notification sent successfully");
             }
         }
-
 
     </script>
 </asp:Content>
