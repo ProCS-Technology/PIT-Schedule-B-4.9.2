@@ -74,19 +74,14 @@
                                     <label for="txtToDate" style="text-align: center; display: block;">To Date</label>
                                     <input id="txtToDate" data-date-format="dd/mm/yyyy" type="text" class="form-control date-picker" runat="server" autocomplete="off" />
                                 </div>
-                                <%--Added by jitendra--%>
+                                <%--Added by jiten--%>
                                 <div class="col-md-2 col-lg-2">
                                     <label style="text-align: center; display: block;">Email Status</label>
                                     <asp:DropDownList ID="ddlStatus" runat="server" class="form-control">
                                         <asp:ListItem Text="All" Value="All"></asp:ListItem>
                                         <asp:ListItem Text="Failed" Value="Failed"></asp:ListItem>
                                         <asp:ListItem Text="Success" Value="Success"></asp:ListItem>
-                                    </asp:DropDownList>
-                                    <%--  <select id="ddlStats" class="form-control">
-                                        <option value="0">--Select--</option>
-                                        <option value="Yes">Sucess</option>
-                                        <option value="No">Failure</option>
-                                    </select>--%>
+                                    </asp:DropDownList>                                 
                                 </div>
 
                                 <div>
@@ -112,7 +107,6 @@
                                             <th>Email Date</th>
                                             <th>Status</th>
                                             <th style="display: none"></th>
-                                            <th style="display: none"></th>
                                             <th>
                                                 <input type="checkbox" id="chkSelectAll" data-status="SelectAll" onclick="selectAllRows();" /></th>
                                             <th></th>
@@ -131,8 +125,8 @@
                                                     <td><%#Eval("EMAIL_STATUS") %></td>
                                                     <td style="display: none"><%#Eval("LOG_ID") %></td>
                                                     <td>
-                                                        <input type="checkbox" id="CheckBoxSelect" class="rowCheckbox" data-status='<%#Eval("EMAIL_STATUS") %>' data-log-id='<%#Eval("LOG_ID") %>' <%# (string)Eval("EMAIL_STATUS") == "Success" ? "disabled='disabled'" : "" %> /></td>                                                    
-                                                    <td style="display:none"></td>
+                                                        <input type="checkbox" id="CheckBoxSelect" onclick="SelectAllRows2();" class="rowCheckbox" data-status='<%#Eval("EMAIL_STATUS") %>' data-log-id='<%#Eval("LOG_ID") %>' <%# (string)Eval("EMAIL_STATUS") == "Success" || (string)Eval("EMAIL_STATUS") == "Pending" ? "disabled='disabled'" : "" %> />
+                                                    </td>
                                                     <td>
                                                         <asp:HiddenField ID="HiddenFieldLogId" runat="server" Value='<%#Eval("LOG_ID") %>' />
                                                         <asp:LinkButton ID="LinkButtonLogDetail" runat="server" OnClick="LinkButtonLogDetail_Click">View Message</asp:LinkButton>
@@ -192,7 +186,6 @@
                 <asp:PostBackTrigger ControlID="btnReSendMail" />
             </Triggers>
         </asp:UpdatePanel>
-        <%--<h1>sumit</h1>--%>
     </form>
 
     <%--Start Datetime--%>
@@ -221,7 +214,8 @@
     <script src="../assets/plugins/custom/ckeditor/ckeditor-mention.js" type="text/javascript"></script>
     <script src="js/Global.js?<%=DateTime.Now %>" type="text/javascript"></script>
     <script>
-        $(document).ready(function () {           
+        $(document).ready(function () {
+            debugger
             $("#Loader").hide();
             if ($("input[id*='HiddenShowModal']").val() == "YES") {
                 $('#ModalFullAuditLog').modal('show');
@@ -236,7 +230,7 @@
         function initializeDataTable() {
             $('#tblReport').DataTable({
                 dom: 'Bfrtip',
-                pageLength: 10,
+                //pageLength: 10,
                 "scrollY": "300px",
                 //"scrollX": true,
                 //"aaSorting": [[0, "desc"]],
@@ -256,7 +250,7 @@
                         }
                     },
                 ],
-                "lengthMenu": [10, 25, 50, 100, 500, 1000, 2000],
+                "lengthMenu": [250,500,1000,2000],
             });
         }
 
@@ -264,45 +258,8 @@
             alert("Please enter required field.");
         }
 
-        <%--function selectAllRows() {
-            debugger
-            var headerCheckbox = document.getElementById('chkSelectAll');
-            var rowCheckboxes = document.getElementsByClassName('rowCheckbox');
-            var selectedLogIds = []; // Array to store selected LOG_ID values
-
-            for (var i = 0; i < rowCheckboxes.length; i++) {
-                var dataStatus = rowCheckboxes[i].getAttribute('data-status');
-                var logId = rowCheckboxes[i].getAttribute('data-log-id');
-                var isRowChecked = rowCheckboxes[i].checked;
-
-                if (headerCheckbox.checked || (isRowChecked && dataStatus === 'Failed')) {
-                    // If the header checkbox is checked, or the row checkbox is checked and it's a failed status
-                    rowCheckboxes[i].checked = true;
-                    selectedLogIds.push(logId); // Add the LOG_ID to the array
-                }
-                else {
-                    rowCheckboxes[i].checked = false;
-
-                    // Update the row checkbox's disabled status
-                    if (dataStatus === 'Success' && (headerCheckbox.checked || isRowChecked)) {
-                        rowCheckboxes[i].disabled = true; // Disable "Success" status rows
-                    } else {
-                        rowCheckboxes[i].disabled = false; // Enable other rows
-                    }
-                }
-            }
-
-            // Set the selectedLogIds array as a comma-separated string
-            var selectedLogIdsStr = selectedLogIds.join(',');
-            // Set the value of the HiddenField control with the selectedLogIds
-            var hiddenField = document.getElementById('<%= HiddenFieldLogIds.ClientID %>');
-            if (hiddenField) {
-                hiddenField.value = selectedLogIdsStr;
-            }
-        }--%>
-
-
-       function selectAllRows() {
+       
+        function selectAllRows() {
             var headerCheckbox = document.getElementById('chkSelectAll');
             var rowCheckboxes = document.getElementsByClassName('rowCheckbox');
             var selectedLogIds = []; // Array to store selected LOG_ID values
@@ -316,7 +273,7 @@
                     selectedLogIds.push(logId); // Add the LOG_ID to the array
                 } else {
                     rowCheckboxes[i].checked = false;
-                    if (dataStatus === 'Success') {
+                    if (dataStatus === 'Success' || dataStatus === 'Pending') {
                         rowCheckboxes[i].disabled = true; // Disable "Success" status rows
                     } else {
                         rowCheckboxes[i].disabled = false; // Enable other rows
@@ -331,9 +288,29 @@
                 hiddenField.value = selectedLogIdsStr;
             }
 
-       }
+        }
 
+        function SelectAllRows2() {
+            var rowCheckboxes = document.getElementsByClassName('rowCheckbox');
+            var failedLogIds = []; // Array to store selected LOG_ID values with "Failed" status
 
+            for (var i = 0; i < rowCheckboxes.length; i++) {
+                var dataStatus = rowCheckboxes[i].getAttribute('data-status');
+                var logId = rowCheckboxes[i].getAttribute('data-log-id');
+
+                if (rowCheckboxes[i].checked && dataStatus === 'Failed') {
+                    failedLogIds.push(logId); // Add the LOG_ID to the array
+                }
+            }
+            var failedLogIds = failedLogIds.join(',');
+            var hiddenField = document.getElementById('<%= HiddenFieldLogIds.ClientID %>');
+            if (hiddenField) {
+                hiddenField.value = failedLogIds;
+            }
+
+        }
+
+     
         var downloadComplete = false;
         var intervalListener;
 
@@ -397,7 +374,7 @@
                 window.clearInterval(intervalListener);
                 $("input[id*=hdnEmailTask]").val('');
                 $("#LoaderProgerss").hide();
-                alert("Custom Email notification sent successfully");
+                alert("All Email notification sent successfully");
             }
         }
 
