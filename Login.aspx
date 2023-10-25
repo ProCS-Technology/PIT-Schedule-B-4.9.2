@@ -125,7 +125,7 @@
                         <br />
                         <div class="form-group" style="margin-left:40%;">
                             <div class="input-group">
-                                <span class="input-group-addon" style="display: none;">
+                                <span id="spnForgetPsw" class="input-group-addon" style="display: none;">
                                     <a href="javascript:fnForgetPassword();" id="forget-password" class="forget-password">Forgot Password?</a>
                                 </span>
                                 <asp:Button ID="btnLogin" runat="server" OnClick="LogIn" Text="Sign In" CssClass="btn btn-block green" style="display: none;" OnClientClick="return fnLogin();" />
@@ -224,6 +224,13 @@
             var authType = $("input[id*=hdnChkAuthType]").val();
             if (authType == 'Hybrid') {
                 $("#BtnNext").show();
+            }
+            else if (authType == 'Application') {
+                $("#lblPassword").show();
+                $("#Password").show(); 
+                $("#BtnNext").hide();
+                $("#spnForgetPsw").show();
+                $("#btnLogin").show();
             }
             else {
                 $("#lblPassword").show();
