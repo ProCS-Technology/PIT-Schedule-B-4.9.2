@@ -4,7 +4,6 @@ namespace ProcsDLL.Models.InsiderTrading.Model
 {
     public class FinalDeclaration : BaseEntity
     {
-        public Int32 Id { get; set; }
         public String fileName { get; set; }
         public String fileFormB { get; set; }
         public String fileFormEOrF { get; set; }

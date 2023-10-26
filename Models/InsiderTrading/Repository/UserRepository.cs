@@ -2588,7 +2588,6 @@ namespace ProcsDLL.Models.InsiderTrading.Repository
                         while (rdr3.Read())
                         {
                             FinalDeclaration finalDeclaration = new FinalDeclaration();
-                            finalDeclaration.Id =   Convert.ToInt32(rdr3["ID"]) ;
                             finalDeclaration.createdOn = !String.IsNullOrEmpty(Convert.ToString(rdr3["CO"])) ? Convert.ToString(rdr3["CO"]) : String.Empty;
                             finalDeclaration.createdBy = !String.IsNullOrEmpty(Convert.ToString(rdr3["USER_NM"])) ? Convert.ToString(rdr3["USER_NM"]) : String.Empty;
                             finalDeclaration.fileName = !String.IsNullOrEmpty(Convert.ToString(rdr3["POLICY_DOC"])) ? Convert.ToString(rdr3["POLICY_DOC"]) : String.Empty;
