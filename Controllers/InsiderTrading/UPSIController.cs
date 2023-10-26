@@ -515,7 +515,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
                         sSaveAs = Path.Combine(HttpContext.Current.Server.MapPath("~" + uploadDir), newFileName);
                         zipFile.SaveAs(sSaveAs);
 
-                        using (ZipArchive archive = ZipFile.Open(sSaveAs, ZipArchiveMode.Read))
+                        using (ZipArchive archive = ZipFile.Open(zipFileSaveAs, ZipArchiveMode.Read))
                         {
                             foreach (ZipArchiveEntry entry in archive.Entries)
                             {

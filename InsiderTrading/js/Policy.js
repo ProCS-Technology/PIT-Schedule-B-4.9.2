@@ -72,14 +72,8 @@ function fnGetAllPolicyDocuments() {
                     str += '<td>' + FormatDate(msg.PolicyList[index].CREATED_DATE, $("input[id*=hdnDateFormat]").val()) + '</td>';
                     str += '<td>' + msg.PolicyList[index].CREATED_BY + '</td>';
                     str += '<td>' + msg.PolicyList[index].DOCUMENT + '</td>';
-
-                    var AttFileName = msg.PolicyList[index].DOCUMENT;
-                    var FileExtension = getFileExtension(AttFileName);
-
-                    if (['pdf', 'txt', 'xlsx', 'xls', 'doc', 'docx', 'png', 'jpeg', 'gif', 'zip', 'ppt', 'pptx'].includes(FileExtension)) {
-                        str += '<td><a class="fa fa-download" onclick="javascript:fnDownloadPolicy(' + msg.PolicyList[index].POLICY_ID + ', \'' + FileExtension + '\');"></a></td>';
-                    }
-
+                    //str += '<td><a class="fa fa-download" target="_blank" href="../assets/logos/Policy/' + msg.PolicyList[index].DOCUMENT + '"></a></td>';
+                    str += '<td><a class="fa fa-download" onclick=\'javascript:fnDownloadPolicy("' + msg.PolicyList[index].POLICY_ID + '");\'></a></td>';
                     str += '</tr>';
                 }
                 $("#tbdPolicyDocumentList").html(str);
@@ -91,106 +85,20 @@ function fnGetAllPolicyDocuments() {
         }
     })
 }
-
-function getFileExtension(AttFileName) {
-    return AttFileName.split('.').pop();
-}
-
-function fnDownloadPolicy(PolicyId, FileExtension) {
-    var webUrl = uri + "/api/Policy/GetPolicyFile?PolicyId=" + PolicyId + "&FileExtension=" + FileExtension;
+function fnDownloadPolicy(PolicyId) {
+    var webUrl = uri + "/api/Policy/GetPolicyFile?PolicyId=" + PolicyId;
     $.ajax({
         url: webUrl,
         type: 'GET',
-        //headers: {
-        //    Accept: "application/octet-stream; base64",
-        //},
+        headers: {
+            Accept: "application/vnd.ms-excel; base64",
+        },
         success: function (data) {
-            if (FileExtension == 'xls') {
-                var uri = 'data:application/vnd.ms-excel;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "ExcelReport.xls";
-
-            }
-            else if (FileExtension == 'xlsx') {
-                var uri = 'data:application/vnd.ms-excel;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "ExcelReport.xlsx";
-            }
-            else if (FileExtension == 'pdf') {
-                var uri = 'data:application/pdf;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "PDFReport.pdf";
-            }
-            else if (FileExtension == 'txt') {
-                var uri = 'data:application/octet-stream;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "TextFile.txt";
-            }
-            else if (FileExtension == 'png') {
-                var uri = 'data:image/png;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "Img.png";
-            }
-            else if (FileExtension == 'jpeg') {
-                var uri = 'data:image/jpeg;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "Img.jpeg";
-            }
-            else if (FileExtension == 'gif') {
-                var uri = 'data:image/gif;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "Img.gif";
-            }
-            else if (FileExtension == 'zip') {
-                var uri = 'data:application/zip;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "file.zip";
-            }
-            else if (FileExtension == 'doc') {
-                var uri = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "DocReport.doc";
-            }
-            else if (FileExtension == 'docx') {
-                var uri = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "DocReport.docx";
-            }
-            else if (FileExtension == 'ppt') {
-                var uri = 'data:application/vnd.ms-powerpoint;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "File.ppt";
-            }
-            else if (FileExtension == 'pptx') {
-                var uri = 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "File.pptx";
-            }
-
+            var uri = 'data:application/vnd.ms-excel;base64,' + data;
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = "Policy.pdf";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

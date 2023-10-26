@@ -73,7 +73,7 @@ function GetAllUPSITask() {
                             //alert($("input[id*=hdnDateFormat]").val());
                             //alert(FormatDate(msg.Dashboard.listUPSITask[i].EmailDate, $("input[id*=hdnDateFormat]").val()));
                             result += '<tr id="tr_' + msg.Dashboard.listUPSITask[i].TaskId + '">';
-
+                            
                             result += '<td>' + FormatDate(msg.Dashboard.listUPSITask[i].EmailDate, $("input[id*=hdnDateFormat]").val()) + '</td>';
                             result += '<td>' + msg.Dashboard.listUPSITask[i].EmailFrom + '</td>';
                             var strTo = msg.Dashboard.listUPSITask[i].EmailTo;
@@ -100,7 +100,7 @@ function GetAllUPSITask() {
                         $("#UPSI_PortletBox").addClass('display-none');
                     }
                 }
-
+                
             }
             else {
                 $("#UPSI_PortletBox").addClass('display-none');
@@ -263,7 +263,7 @@ function fnGetUPSITaskById(taskid) {
                             result += '<input disabled id="txtCPRemarks" class="form-control form-control-inline" type="text" value="' + msg.UPSIGroups[0].ConnectedPersons[i].CPFirmNm + '" />';
                         }
 
-
+                        
                         result += '</td>';
                         result += '</tr>';
                     }
@@ -286,7 +286,6 @@ function fnGetUPSITaskById(taskid) {
         }
     });
 }
-var FileExtension;
 function fnGetUPSIMessage(taskid) {
     $("#Loader").show();
     var webUrl = uri + "/api/DashboardIT/GetMyUPSITaskById";
@@ -310,8 +309,7 @@ function fnGetUPSIMessage(taskid) {
                 $("#dvUPSITaskMSGCC").html(msg.Dashboard.listUPSITask[0].EmailCC);
                 $("#dvUPSITaskMsgDate").html(msg.Dashboard.listUPSITask[0].EmailDate);
                 $("#dvUPSITaskMsgSubject").html(msg.Dashboard.listUPSITask[0].EmailSubject);
-                $("#dvAttechmentlistMsg").html(msg.Dashboard.listUPSITask[0].TaskId);
-                //$("#dvAttechmentlistMsg").html('');
+                $("#dvAttechmentlistMsg").html('');
 
                 if (msg.Dashboard.listUPSITask[0].Group_id == "Subject") {
                     $("#dvSubjectHdr").show();
@@ -336,14 +334,7 @@ function fnGetUPSIMessage(taskid) {
                 var result = "";
                 for (var i = 0; i < msg.Dashboard.listUPSITask[0].listAttachment.length; i++) {
                     result += '<p>';
-                    var AttFileName = msg.Dashboard.listUPSITask[0].listAttachment[i].Attachment;
-                    var FileExtension = getFileExtension(AttFileName);
-                    var id = msg.Dashboard.listUPSITask[i].TaskId;
-
-                    if (['pdf', 'txt', 'xlsx', 'xls', 'doc', 'docx', 'png', 'jpeg', 'gif', 'zip', 'ppt', 'pptx'].includes(FileExtension)) {
-                        result += '<a onclick="fnDownloadAttachment(' + msg.Dashboard.listUPSITask[i].TaskId + ', \'' + FileExtension + '\');" target="_blank">' + msg.Dashboard.listUPSITask[0].listAttachment[i].Attachment + '</a>';
-                    }
-
+                    result += '<a href="UPSI/' + msg.Dashboard.listUPSITask[0].listAttachment[i].Attachment + '" target="_blank">' + msg.Dashboard.listUPSITask[0].listAttachment[i].Attachment + '</a>';
                     result += '</p>';
                 }
                 $("#dvAttechmentlistMsg").html(result);
@@ -364,10 +355,6 @@ function fnGetUPSIMessage(taskid) {
             }
         }
     });
-}
-
-function getFileExtension(AttFileName) {
-    return AttFileName.split('.').pop();
 }
 function fnCloseUPSITask() {
     var taskid = $("#hdnTaskId").val();
@@ -479,8 +466,8 @@ function fnCloseUPSITask() {
 function fnUpdateUPSITask() {
     var taskid = $("#txtUPSITaskID").val();
     var groupid = $("#textUpsigroup").val();
-
-    return
+    
+    return 
     if (groupid == undefined || groupid == "0" || groupid == null) {
         $("#textUpsigroup").addClass('required-red');
         $('#lblUpsigroup').addClass('required');
@@ -500,13 +487,13 @@ function fnUpdateUPSITask() {
         data: {
             GROUP_ID: groupid,
             TaskId: taskid,
-            Status: 'closed'
+            Status:'closed'
 
         },
-        // contentType: "application/json; charset=utf-8",
+       // contentType: "application/json; charset=utf-8",
         //datatype: "json",
         success: function (msg) {
-
+          
             $("#Loader").hide();
             if (msg.Msg == "SessionExpired") {
                 alert("Your session is expired. Please login again to continue");
@@ -543,11 +530,12 @@ function fnUpdateUPSITask() {
     });
 
 }
-function fnupsiNonCompliance() {
+function fnupsiNonCompliance()
+{
 
     var taskid = $("#txtUPSITaskID").val();
     var groupid = '0';
-
+   
     var webUrl = uri + "/api/DashboardIT/UpdateUPSITaskById";
     $.ajax({
         url: webUrl,
@@ -562,7 +550,7 @@ function fnupsiNonCompliance() {
         // contentType: "application/json; charset=utf-8",
         //datatype: "json",
         success: function (msg) {
-
+        
             $("#Loader").hide();
             if (msg.Msg == "SessionExpired") {
                 alert("Your session is expired. Please login again to continue");
@@ -574,7 +562,7 @@ function fnupsiNonCompliance() {
                 alert("Task has been updated!");
                 $("#stack1UPSITaskClosed").modal("hide");
                 $("#stack1").modal("hide");
-
+                
                 GetAllUPSITask();
 
             }
@@ -657,7 +645,7 @@ function fnDiscardTask() {
             $("#Loader").hide();
             alert(response.status + ' ' + response.statusText);
         }
-    });
+    });    
 }
 function fnBindAllUPSIGroup(GrpIdX) {
     //alert("In function fnBindAllUPSIGroup");
@@ -955,7 +943,7 @@ function fnSaveConnectedPerson() {
         if (ConnectedPersons.length > 0) {
             $("#Loader").show();
             var token = $("#TokenKey").val();
-
+            
             var webUrl = uri + "/api/ConnectedPerson/SaveConnectedPersonsForUPSITask";
             $.ajax({
                 url: webUrl,
@@ -1117,113 +1105,3 @@ function fnSaveMember() {
         });
     }
 }
-
-
-function fnDownloadAttachment(TaskId, FileExtension) {
-    debugger;
-    var webUrl = uri + "/api/DashboardIT/GetAttachmentFile?TaskId=" + TaskId + "&FileExtension=" + FileExtension;
-    $.ajax({
-        url: webUrl,
-        type: 'GET',
-        //headers: {
-        //    Accept: "application/octet-stream; base64",
-        //},
-        success: function (data) {
-            debugger;
-            if (FileExtension == 'xls') {
-                var uri = 'data:application/vnd.ms-excel;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "ExcelReport.xls";
-
-            }
-            else if (FileExtension == 'xlsx') {
-                var uri = 'data:application/vnd.ms-excel;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "ExcelReport.xlsx";
-            }
-            else if (FileExtension == 'pdf') {
-                var uri = 'data:application/pdf;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "PDFReport.pdf";
-            }
-            else if (FileExtension == 'txt') {
-                var uri = 'data:application/octet-stream;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "TextFile.txt";
-            }
-            else if (FileExtension == 'png') {
-                var uri = 'data:image/png;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "Img.png";
-            }
-            else if (FileExtension == 'jpeg') {
-                var uri = 'data:image/jpeg;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "Img.jpeg";
-            }
-            else if (FileExtension == 'gif') {
-                var uri = 'data:image/gif;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "Img.gif";
-            }
-            else if (FileExtension == 'zip') {
-                var uri = 'data:application/zip;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "file.zip";
-            }
-            else if (FileExtension == 'doc') {
-                var uri = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "DocReport.doc";
-            }
-            else if (FileExtension == 'docx') {
-                var uri = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "DocReport.docx";
-            }
-            else if (FileExtension == 'ppt') {
-                var uri = 'data:application/vnd.ms-powerpoint;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "File.ppt";
-            }
-            else if (FileExtension == 'pptx') {
-                var uri = 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,' + data;
-                var link = document.createElement("a");
-                link.href = uri;
-                link.style = "visibility:hidden";
-                link.download = "File.pptx";
-            }
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
-        error: function () {
-            console.log('error Occured while Downloading CSV file.');
-        },
-    });
-}
-
-

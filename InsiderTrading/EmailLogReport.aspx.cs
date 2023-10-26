@@ -435,10 +435,6 @@ namespace ProcsDLL.InsiderTrading
             }
         }
 
-        protected string GetFileExtension(string relativePath)
-        {
-            return Path.GetExtension(relativePath);
-        }
 
         [WebMethod(EnableSession = true)]
         public static string CheckDownload()
