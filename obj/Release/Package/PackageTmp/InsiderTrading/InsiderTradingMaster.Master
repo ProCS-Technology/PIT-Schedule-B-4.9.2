@@ -1,0 +1,324 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="InsiderTradingMaster.master.cs" Inherits="ProcsDLL.InsiderTrading.InsiderTradingMaster" %>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head runat="server">
+        <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
+        <meta charset="utf-8" />
+        <title>ProCS-Insider Trading</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/css/components.min.css" rel="stylesheet" id="style_components" type="text/css" />
+        <link href="../assets/global/css/plugins.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/stylesheets/darkblue.min.css" rel="stylesheet" type="text/css" id="style_color" />
+        <link href="../assets/layouts/layout4/css/custom.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/stylesheets/layout.min.css" rel="stylesheet" type="text/css" />
+        <link href="../assets/global/css/Preloader.css" rel="stylesheet" />
+        <%--<link href="stylesheets/InsiderTradingMaster.css" rel="stylesheet" type="text/css" />--%>
+        <link rel="shortcut icon" href="favicon.ico" />
+        <script src="../assets/global/plugins/jquery.min.js" type="text/javascript"></script>
+        <script src="../assets/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="../assets/global/plugins/js.cookie.min.js" type="text/javascript"></script>
+        <script src="../assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+        <script src="../assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
+        <script src="../assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
+        <script src="../assets/global/scripts/app.min.js" type="text/javascript"></script>
+        <script src="../assets/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script>
+        <script src="../assets/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
+        <script src="../assets/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script>
+        <script src="../assets/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script>
+        <script src="js/FormatDate.js" type="text/javascript"></script>
+        <%--<script src="js/momentJS.js" type="text/javascript"></script>--%>
+        <script>
+            function preventBack() { window.history.forward(); }
+            setTimeout("preventBack()", 0);
+            window.onunload = function () { null };
+            $(document).ready(function () {
+                $('#clickmewow').click(function () {
+                    $('#radio1003').attr('checked', 'checked');
+                });
+            })
+        </script>
+        <style>
+            #myProgress {
+                width: 100%;
+                background-color: grey;
+            }
+            #myBar {
+                width: 0%;
+                height: 30px;
+                background-color: green;
+            }
+            .modal-body {
+                max-height: calc(100vh - 200px);
+                overflow-y: auto;
+            }
+            .page-header.navbar {
+                background-color: #364150;
+
+            }
+            .page-header.navbar .page-logo {
+                background: transparent;
+            }
+            .page-header.navbar .page-logo .logo-default {
+                padding: 4.5px 0;
+            }
+            .page-header.navbar .top-menu .navbar-nav > li.dropdown .dropdown-toggle:hover, .page-header.navbar .top-menu .navbar-nav > li.dropdown.open .dropdown-toggle {
+                background-color: transparent !important;
+            }
+            .page-header.navbar .top-menu .navbar-nav > li.dropdown-user .dropdown-toggle {
+                padding: 16px 0 0;
+            }
+            .page-header.navbar .top-menu {
+                margin: 0px;
+                padding: 0 !important;
+                float: none;
+            }
+            .dropdown-menu > li.active:hover > a, .dropdown-menu > li.active > a, .dropdown-menu > li:hover > a {
+                text-decoration: none;
+                background-image: none;
+                background-color: #b4bcc8;
+                color: white !important;
+                filter: none;
+            }
+            .page-sidebar-menu > li.active:hover > a, .page-sidebar-menu > li.active > a, .page-sidebar-menu > li:hover > a {
+                text-decoration: none;
+                background-image: none;
+                background-color: #b4bcc8 !important;
+                color: white !important;
+                filter: none;
+            }
+            .page-sidebar .page-sidebar-menu > li.open > a, .page-sidebar .page-sidebar-menu > li:hover > a, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu > li.open > a, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu > li:hover > a {
+                background: #b4bcc8;
+                color: #b4bcc8;
+            }
+            .page-sidebar .page-sidebar-menu .sub-menu > li.active > a, .page-sidebar .page-sidebar-menu .sub-menu > li.open > a, .page-sidebar .page-sidebar-menu .sub-menu > li:hover > a, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu > li.active > a, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu > li.open > a, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu > li:hover > a {
+                background: #b4bcc8 !important;
+            }
+                .page-sidebar .page-sidebar-menu .sub-menu > li.active > a > span, .page-sidebar .page-sidebar-menu .sub-menu > li.open > a > span, .page-sidebar .page-sidebar-menu .sub-menu > li:hover > a > span, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu > li.active > a > span, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu > li.open > a > span, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu > li:hover > a > span {
+                    color: white !important;
+                }
+            .page-header.navbar .menu-toggler > span, .page-header.navbar .menu-toggler > span:after, .page-header.navbar .menu-toggler > span:before {
+                background: #c6cfda;
+            }
+            @media (min-width: 992px) {
+                .page-sidebar-closed .brand-section {
+                    display: none !important;
+                }
+                .brand-section {
+                    display: block !important;
+                    position: fixed;
+                    bottom: 0;
+                    width: 235px;
+                    background: #364150;
+                    padding-left: 15px;
+                }
+                    .brand-section img {
+                        padding-top: 8px;
+                    }
+                    .brand-section a {
+                        color: #fff;
+                    }
+                        .brand-section a:hover, .brand-section a:focus {
+                            color: #f1efef;
+                        }
+            }
+            .brand-section h6 {
+                font-weight: 500;
+                color: #fff;
+            }
+            .page-sidebar-menu li:last-child {
+                border-bottom: none !important;
+            }
+            .page-sidebar .page-sidebar-menu, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu {
+                padding: 0 0 90px;
+            }
+            #gallery {
+                display: none;
+            }
+                #gallery img {
+                    height: 300px;
+                    display: inline-block;
+                }
+            #progress-bar {
+                height: 10px;
+                display: block;
+                width: 300px;
+                margin: 0 auto;
+                background: transparent;
+                padding: 5px;
+                margin-top: 150px;
+                border: 0px solid #00a6ff;
+                text-align: center;
+                position: relative;
+            }
+                #progress-bar > #progress {
+                    width: 0%;
+                    height: 100%;
+                    background: #00a6ff;
+                }
+                #progress-bar > p {
+                    vertical-align: middle;
+                    display: inline-block;
+                    color: green;
+                    font-weight: bold;
+                    margin: -50px auto 0;
+                }
+        </style>
+    </head>
+    <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo page-sidebar-fixed" style="font-family: Trebuchet MS!important;">
+        <input type="hidden" runat="server" id="TokenKey" />
+        <input type="hidden" runat="server" id="hdnDateFormat" />
+        <input type="hidden" runat="server" id="hdnJSDateFormat" />
+
+        <%--<input type="text" runat="server" id="HnDateFormat" />
+        <input type="text" runat="server" id="HnJSDateFormat" />--%>
+
+        <div id="Loader">
+            <div class="waiting-text">
+                <h4>
+                    <img src="../assets/global/img/loading-spinner-blue.gif" alt="" />&nbsp;&nbsp;Please wait. Processing request...
+                </h4>
+            </div>
+        </div>
+        <div id="LoaderProgerss" style="display:none;">
+            <div class="waiting-text">
+                <h4>
+                    <img src="../assets/global/img/loading-spinner-blue.gif" alt="" />&nbsp;&nbsp;Please wait. Processing request...
+                </h4>
+                <div id="progress-bar">
+                    <div id="progress"></div>
+                    <p>
+                        <span id="percentage"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="page-header navbar navbar-fixed-top My-Top-Header-Custom">
+            <div class="page-header-inner ">
+                <div class="page-logo">
+                    <a href="#">
+                        <img src="../assets/images/logo_admin.png" class="logo-default" />
+                    </a>
+                    <div class="menu-toggler sidebar-toggler"><span></span></div>
+                </div>
+                <a href="javascript:;" class="menu-toggler responsive-toggler" data-toggle="collapse" data-target=".navbar-collapse"></a>
+                <div class="page-top">
+                    <div class="top-menu">
+                        <ul class="nav navbar-nav" style="padding: 20px 0 0 20px; justify-content: center !important; color: #c6cfda;">
+                            <li class="text-center" id="liLbl" runat="server">Insider Trading Compliance Management System</li>
+                        </ul>
+                        <ul class="nav navbar-nav pull-right">
+                            <li class="separator hide"></li>
+                            <li class="separator hide"></li>
+                            <li class="dropdown dropdown-user">
+                                <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                                    <img id="ImgUserUploadedImageHeader" runat="server" alt="" style="background-color: white" class="img-circle" src="../assets/layouts/layout/img/avatar3_small.jpg" />
+                                    <span id="SpUserNameHeader" runat="server" class="username username-hide-on-mobile My-User-Header-Name">Nick </span>
+                                    <i style="color: black;" class="fa fa-angle-down"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-default">
+                                    <li id="liRecoverPassword">
+                                        <a onserverclick="RecoverPassword" runat="server" style="font-family: Trebuchet MS!important;">
+                                            <i class="icon-key"></i>Recover Password
+                                        </a>
+                                    </li>
+                                    <li id="liRecoverDivider" class="divider"></li>
+                                    <li id="liChangePassword">
+                                        <a href="../ChangePassword.aspx" style="font-family: Trebuchet MS!important;">
+                                            <i class="icon-key"></i>Change Password
+                                        </a>
+                                    </li>
+                                    <li id="liChangeDivider" class="divider"></li>
+                                    <li id="liAdminManual">
+                                        <a target="_blank" href="UserManual/Admin-Manual.pdf" style="font-family: Trebuchet MS!important;">
+                                            <i class="icon-key"></i>Admin Manual
+                                        </a>
+                                    </li>
+                                    <li id="liAdminManualDivider" style="display: none;" class="divider"></li>
+                                    <li>
+                                        <a target="_blank" href="UserManual/User-Manual.pdf" style="font-family: Trebuchet MS!important;">
+                                            <i class="icon-key"></i>User Manual
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a target="_blank" href="CodeOfConduct/Code-Of-Conduct.pdf" style="font-family: Trebuchet MS!important;">
+                                            <i class="icon-key"></i>Insider Trading Code
+                                        </a>
+                                    </li>
+                                    <li id="liCodeOfConductDivider" class="divider"></li>
+                                    <li id="liLogOut">
+                                        <a href="../LogOut.aspx" style="font-family: Trebuchet MS!important;">
+                                            <i class="icon-key"></i>Log Out
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="separator hide"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="page-container My-Top-Header-Custom">
+            <div class="page-sidebar-wrapper">
+                <div class="page-sidebar navbar-collapse" style="margin-top: 4.5px;">
+                    <%=ltrMenu %>
+                </div>
+            </div>
+            <div class="page-content-wrapper" style="margin-top: 29px;">
+                <div class="page-content" style="overflow-x: hidden!important;">
+                    <div class="page-head"></div>
+                    <div>
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="ModalSwitchCompany" tabindex="-1" data-backdrop="static" data-keyboard="false">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="javascript:fnClearBrokerNoteRequestDetails();"></button>
+                            <h4 class="modal-title">Select Company</h4>
+                        </div>
+                        <div class="modal-body">
+                            <%=ltrCompany %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="javascript:;" class="page-quick-sidebar-toggler">
+                <i class="icon-login"></i>
+            </a>
+        </div>
+        <div class="brand-section" style="display: none">
+            <img src="../assets/images/logo_procs.png" class="img-responsive" />
+            <h6>Version: <span class="text-info" id="spnVersion" runat="server"></span></h6>
+            <h6><a href="https://pro-cs.in/" target="_blank">www.pro-cs.in</a></h6>
+                
+        </div>
+        <div class="scroll-to-top">
+            <i class="icon-arrow-up"></i>
+        </div>
+        <div class="quick-nav-overlay"></div>
+        <script type="text/javascript">
+            $(function () {
+                $('.modal').on('shown.bs.modal', function (e) {
+                    $(".modal-body").animate({ scrollTop: 0 }, 'fast');
+                });
+
+            });
+            function fnSwitchCompany(companyid, CompanyName) {
+                window.location.href = "../SwitchCompany.aspx?compid=" + companyid + "&CompName=" + CompanyName;
+            }
+        </script>
+    </body>
+</html>

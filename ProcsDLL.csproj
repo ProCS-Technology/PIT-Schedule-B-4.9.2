@@ -7681,6 +7681,7 @@
     </Compile>
     <Compile Include="InsiderTrading\PendingTaskReport.aspx.cs">
       <DependentUpon>PendingTaskReport.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="InsiderTrading\PendingTaskReport.aspx.designer.cs">
       <DependentUpon>PendingTaskReport.aspx</DependentUpon>

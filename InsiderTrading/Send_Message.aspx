@@ -470,8 +470,7 @@
     </script>
 </asp:Content>
 
-<%--<%@ Page Title="Send Email" Language="C#" MasterPageFile="~/InsiderTrading/InsiderTradingMaster.Master" AutoEventWireup="true" CodeBehind="Send_Message.aspx.cs" Inherits="ProcsDLL.InsiderTrading.Send_Message" ValidateRequest="false" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+<%--<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
     <link href="../assets/global/css/components.min.css" rel="stylesheet" />
     <link href="../assets/global/css/plugins.min.css" rel="stylesheet" />
     <link href="../assets/global/plugins/bootstrap-summernote/summernote.css" rel="stylesheet" type="text/css" />

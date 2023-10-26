@@ -164,7 +164,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
                     {
                         HttpPostedFile file = files[i];
                         int cLength = file.ContentLength;
-                        
+
                         String ext = Path.GetExtension(file.FileName);
                         string sNm = Path.GetFileNameWithoutExtension(file.FileName);
                         String name = "Policy_";
@@ -173,7 +173,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
                         string sContentTyp = file.ContentType;
                         if (sContentTyp.ToUpper() == "APPLICATION/PDF")
                         {
-                            if (sFileSize!=cLength.ToString())
+                            if (sFileSize != cLength.ToString())
                             {
                                 PolicyResponse objResponse = new PolicyResponse();
                                 objResponse.StatusFl = false;
@@ -261,37 +261,37 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 return objResponse;
             }
         }
-        [Route("GetESOPFile")]
+
+
+        [Route("GetPolicyFile")]
         [HttpGet]
-        [SwaggerOperation(Tags = new[] { "Benpos APIs" })]
-        public HttpResponseMessage GetPolicyFile()
+        [SwaggerOperation(Tags = new[] { "Policy APIs" })]
+        public HttpResponseMessage GetPolicyFile(string PolicyId, string FileExtension)
         {
-            try
+            string sConStr = CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ConnectionStringIT"], true);
+            string filenameX = "";
+            using (SqlConnection sCon = new SqlConnection(sConStr))
             {
-                //if (HttpContext.Current.Session.Count == 0)
-                //{
-                //    BenposResponse objResponse = new BenposResponse();
-                //    objResponse.StatusFl = false;
-                //    objResponse.Msg = "SessionExpired";
-                //    return objResponse;
-                //}
-
-                string sPolicyId = Convert.ToString(HttpContext.Current.Request.QueryString["PolicyId"]);
-                string str = CryptorEngine.Decrypt(Convert.ToString(ConfigurationManager.AppSettings["ConnectionStringIT"]), true);
-                string sFileNm = "";
-
-                using (SqlConnection sCon = new SqlConnection(str))
+                sCon.Open();
+                string sqlQuery = "SELECT DOCUMENT FROM PROCS_INSIDER_POLICY_MSTR_ARCHIVE(NOLOCK) WHERE ID=@PolicyId";
+                SqlCommand cmd = new SqlCommand(sqlQuery, sCon);
+                cmd.Parameters.AddWithValue("@PolicyId", PolicyId);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                sCon.Close();
+                if (dt.Rows.Count > 0)
                 {
-                    SqlCommand sCmd = new SqlCommand();
-                    sCmd.Connection = sCon;
-                    sCmd.CommandType = CommandType.Text;
-                    sCon.Open();
-                    sCmd.CommandText = "SELECT DOCUMENT FROM PROCS_INSIDER_POLICY_MSTR_ARCHIVE(NOLOCK) WHERE ID=" + sPolicyId;
-                    sFileNm = Convert.ToString(sCmd.ExecuteScalar());
+                    filenameX = dt.Rows[0]["DOCUMENT"].ToString();
                 }
-                string sFile = Path.Combine(HttpContext.Current.Server.MapPath("~/assets/logos/Policy/"), sFileNm);
+                //string extension = Path.GetExtension(filenameX);
+                //string EXT = FileExtension;
+                //string basePath = "~/InsiderTrading/UPSI/"; // Base path to the directory
+                //string filePath1 = HttpContext.Current.Server.MapPath(basePath + filenameX);
 
-                byte[] fileBook = File.ReadAllBytes(sFile);// tempPathExcelFile);
+                string filePath = HttpContext.Current.Server.MapPath("~/assets/logos/Policy/" + filenameX);
+
+                byte[] fileBook = File.ReadAllBytes(filePath);
                 MemoryStream stream = new MemoryStream();
                 string excelBase64String = Convert.ToBase64String(fileBook);
                 StreamWriter excelWriter = new StreamWriter(stream);
@@ -300,19 +300,108 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 stream.Position = 0;
                 HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
                 httpResponseMessage.Content = new StreamContent(stream);
-                httpResponseMessage.Content.Headers.Add("x-filename", "Policy.pdf");
-                httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
-                httpResponseMessage.Content.Headers.ContentDisposition =
-                    new ContentDispositionHeaderValue("attachment");
-                httpResponseMessage.Content.Headers.ContentDisposition.FileName = "Policy.pdf";
+                if (FileExtension == "pdf")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "PdfReport.pdf");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "PdfReport.pdf";
+                }
+                else if (FileExtension == "txt")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "TextFile.txt");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "TextFile.txt";
+                }
+                else if (FileExtension == "xlsx")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "ExcelReport.xlsx");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "ExcelReport.xlsx";
+                }
+                else if (FileExtension == "xls")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "ExcelReport.xls");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "ExcelReport.xls";
+                }
+                else if (FileExtension == "doc")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "DocReport.doc");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "DocReport.doc";
+                }
+                else if (FileExtension == "docx")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "DocReport.docx");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "DocReport.docx";
+                }
+                else if (FileExtension == "png")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "img.png");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "img.png";
+                }
+                else if (FileExtension == "jpeg")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "img.jpeg");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "img.jpeg";
+                }
+                else if (FileExtension == "gif")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "img.gif");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("image/gif");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "img.gif";
+                }
+                else if (FileExtension == "zip")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "file.zip");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/zip");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "file.zip";
+                }
+                else if (FileExtension == "ppt")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "File.ppt");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "File.ppt";
+                }
+                else if (FileExtension == "pptx")
+                {
+                    httpResponseMessage.Content.Headers.Add("x-filename", "File.pptx");
+                    httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+                    httpResponseMessage.Content.Headers.ContentDisposition =
+                        new ContentDispositionHeaderValue("attachment");
+                    httpResponseMessage.Content.Headers.ContentDisposition.FileName = "File.pptx";
+                }
+
                 httpResponseMessage.StatusCode = HttpStatusCode.OK;
                 return httpResponseMessage;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-                //return ReturnError(ErrorType.Error, errorMessage);
+
             }
         }
+
     }
 }

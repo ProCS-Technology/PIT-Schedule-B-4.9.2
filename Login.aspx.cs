@@ -23,6 +23,9 @@ namespace ProcsDLL
     {
         public static string chkUserType { get; set; }
         Random random = new Random();
+
+        string sConStr = CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ConnectionStringIT"], true);
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
@@ -61,76 +64,178 @@ namespace ProcsDLL
             HiddenADFSUrl.Value = sUrl;
             return sUrl;
         }
+        //protected void ResetPassword(object sender, EventArgs e)
+        //{
+        //    ProcsDLL.Models.Login.Modal.Login login = new ProcsDLL.Models.Login.Modal.Login();
+        //    login.Email = TextBoxLoginId.Text;
+        //    LoginRequest objLogin = new LoginRequest(login);
+        //    LoginResponse objResponse = objLogin.GetUserInfo();
+        //    if (objResponse.StatusFl)
+        //    {
+        //        string from = "procstest@gmail.com";
+        //        string disclosureEmail = String.Empty;
+        //        string to = objResponse.User.Email;
+        //        string smtpHostName = String.Empty;
+        //        bool ssl = true;
+        //        string smtpUserName = "procstest@gmail.com";
+        //        Int32 port = 587;
+        //        string password = "P@ssw0rd@123";
+        //        bool userDefaultCredential = false;
+
+        //        SqlParameter[] parameters1 = new SqlParameter[3];
+        //        parameters1[0] = new SqlParameter("@Mode", "GET_Smtp_Config_List");
+        //        parameters1[1] = new SqlParameter("@SET_COUNT", SqlDbType.Int);
+        //        parameters1[1].Direction = ParameterDirection.Output;
+        //        parameters1[2] = new SqlParameter("@COMPANY_ID", objResponse.User.CompanyId);
+
+        //        DataSet ds1 = SQLHelper.ExecuteDataset(SQLHelper.GetConnString(), CommandType.StoredProcedure, "SP_PROCS_INSIDER_CONFIG_SMTP", Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ITDB"], true)), parameters1);
+        //        if (ds1.Tables[0].Rows.Count > 0)
+        //        {
+        //            from = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["DEFAULT_EMAIL"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["DEFAULT_EMAIL"]) : String.Empty;
+        //            disclosureEmail = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["CONTINUAL_DISCLOSURE_EMAIL"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["CONTINUAL_DISCLOSURE_EMAIL"]) : String.Empty;
+        //            smtpHostName = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_HOST_NAME"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_HOST_NAME"]) : String.Empty;
+        //            port = Convert.ToInt32(ds1.Tables[0].Rows[0]["PORT"]);
+        //            ssl = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SSL"]))) ? (Convert.ToString(ds1.Tables[0].Rows[0]["SSL"]) == "Yes" ? true : false) : false;
+        //            smtpUserName = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_USER_NAME"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_USER_NAME"]) : String.Empty;
+        //            password = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["PASSWORD"]))) ? CryptorEngine.Decrypt(Convert.ToString(ds1.Tables[0].Rows[0]["PASSWORD"]), true) : String.Empty;
+        //            userDefaultCredential = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["USER_DEFAULT_CREDENTIAL"]))) ? (Convert.ToString(ds1.Tables[0].Rows[0]["USER_DEFAULT_CREDENTIAL"]) == "Yes" ? true : false) : false;
+        //        }
+
+        //        string userName = objResponse.User.UserName;
+
+        //        string moreSalts = Convert.ToString(HttpContext.Current.Session["moreSalt"]);
+
+        //        var newPasswordMade = "H@xxL0rd" + moreSalts;
+        //        var newPassword = hashcodegenerate.GetSHA512(newPasswordMade);
+        //        string loginId = objResponse.User.LoginId;
+        //        string sCmnpnId = objResponse.User.CompanyId;
+
+        //        login.LoginId = loginId;
+        //        login.Password = newPassword;
+        //        objLogin = new LoginRequest(login);
+        //        objResponse = objLogin.ChangePassword();
+
+        //        if (objResponse.StatusFl)
+        //        {
+        //            String msg = " <br/>";
+        //            msg += "Dear " + userName + ", <br/><br/>";
+        //            msg += "Your login id is <b>" + loginId + "</b><br/><br/>";
+        //            msg += "Your login password is <b>" + newPasswordMade + "</b><br/><br/>";
+        //            msg += "This is a system generated mail. Please do not reply on this mail.<br/><br/>";
+        //            msg += "Thanks,<br/>ProCS Technology";
+        //            EmailSender.SendMail(
+        //                to, "Password Recovered", msg, null, "Password Recovery", sCmnpnId, "", loginId, loginId
+        //            );
+        //        }
+        //        ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){UserInfo('If your Email Id or Username saved in our database then you will receive Password Link');},1000);", true);
+        //        TextBoxLoginId.Text = String.Empty;
+        //    }
+        //    else
+        //    {
+        //        ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){UserInfo('If your Email Id or Username saved in our database then you will receive Password Link');},1000);", true);
+        //        TextBoxLoginId.Text = String.Empty;
+        //    }
+        //}
+
+
         protected void ResetPassword(object sender, EventArgs e)
         {
             ProcsDLL.Models.Login.Modal.Login login = new ProcsDLL.Models.Login.Modal.Login();
             login.Email = TextBoxLoginId.Text;
             LoginRequest objLogin = new LoginRequest(login);
             LoginResponse objResponse = objLogin.GetUserInfo();
-            if (objResponse.StatusFl)
+
+            //string emailTo = "prateek.raj@aksitservices.co.in";
+            string emailTo = TextBoxLoginId.Text;
+
+            string query = "SELECT ISNULL(ABS(DATEDIFF(MINUTE, GETDATE(),(SELECT MAX(EMAIL_DT) FROM PROCS_INSIDER_EMAIL_LOG WHERE EMAIL_ACTION = 'Password Recovery' AND EMAIL_TO = @EmailTo AND EMAIL_STATUS = 'Success'))), 0)";
+
+            using (SqlConnection connection = new SqlConnection(sConStr))
             {
-                string from = "procstest@gmail.com";
-                string disclosureEmail = String.Empty;
-                string to = objResponse.User.Email;
-                string smtpHostName = String.Empty;
-                bool ssl = true;
-                string smtpUserName = "procstest@gmail.com";
-                Int32 port = 587;
-                string password = "P@ssw0rd@123";
-                bool userDefaultCredential = false;
-
-                SqlParameter[] parameters1 = new SqlParameter[3];
-                parameters1[0] = new SqlParameter("@Mode", "GET_Smtp_Config_List");
-                parameters1[1] = new SqlParameter("@SET_COUNT", SqlDbType.Int);
-                parameters1[1].Direction = ParameterDirection.Output;
-                parameters1[2] = new SqlParameter("@COMPANY_ID", objResponse.User.CompanyId);
-
-                DataSet ds1 = SQLHelper.ExecuteDataset(SQLHelper.GetConnString(), CommandType.StoredProcedure, "SP_PROCS_INSIDER_CONFIG_SMTP", Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ITDB"], true)), parameters1);
-                if (ds1.Tables[0].Rows.Count > 0)
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    from = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["DEFAULT_EMAIL"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["DEFAULT_EMAIL"]) : String.Empty;
-                    disclosureEmail = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["CONTINUAL_DISCLOSURE_EMAIL"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["CONTINUAL_DISCLOSURE_EMAIL"]) : String.Empty;
-                    smtpHostName = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_HOST_NAME"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_HOST_NAME"]) : String.Empty;
-                    port = Convert.ToInt32(ds1.Tables[0].Rows[0]["PORT"]);
-                    ssl = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SSL"]))) ? (Convert.ToString(ds1.Tables[0].Rows[0]["SSL"]) == "Yes" ? true : false) : false;
-                    smtpUserName = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_USER_NAME"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_USER_NAME"]) : String.Empty;
-                    password = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["PASSWORD"]))) ? CryptorEngine.Decrypt(Convert.ToString(ds1.Tables[0].Rows[0]["PASSWORD"]), true) : String.Empty;
-                    userDefaultCredential = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["USER_DEFAULT_CREDENTIAL"]))) ? (Convert.ToString(ds1.Tables[0].Rows[0]["USER_DEFAULT_CREDENTIAL"]) == "Yes" ? true : false) : false;
+                    command.Parameters.AddWithValue("@EmailTo", emailTo);
+                    int result = (int)command.ExecuteScalar();
+                    if (result > 30)
+                    {
+
+                        if (objResponse.StatusFl)
+                        {
+                            string from = "procstest@gmail.com";
+                            string disclosureEmail = String.Empty;
+                            string to = objResponse.User.Email;
+                            string smtpHostName = String.Empty;
+                            bool ssl = true;
+                            string smtpUserName = "procstest@gmail.com";
+                            Int32 port = 587;
+                            string password = "P@ssw0rd@123";
+                            bool userDefaultCredential = false;
+
+                            SqlParameter[] parameters1 = new SqlParameter[3];
+                            parameters1[0] = new SqlParameter("@Mode", "GET_Smtp_Config_List");
+                            parameters1[1] = new SqlParameter("@SET_COUNT", SqlDbType.Int);
+                            parameters1[1].Direction = ParameterDirection.Output;
+                            parameters1[2] = new SqlParameter("@COMPANY_ID", objResponse.User.CompanyId);
+
+                            DataSet ds1 = SQLHelper.ExecuteDataset(SQLHelper.GetConnString(), CommandType.StoredProcedure, "SP_PROCS_INSIDER_CONFIG_SMTP", Convert.ToString(CryptorEngine.Decrypt(ConfigurationManager.AppSettings["ITDB"], true)), parameters1);
+                            if (ds1.Tables[0].Rows.Count > 0)
+                            {
+                                from = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["DEFAULT_EMAIL"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["DEFAULT_EMAIL"]) : String.Empty;
+                                disclosureEmail = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["CONTINUAL_DISCLOSURE_EMAIL"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["CONTINUAL_DISCLOSURE_EMAIL"]) : String.Empty;
+                                smtpHostName = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_HOST_NAME"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_HOST_NAME"]) : String.Empty;
+                                port = Convert.ToInt32(ds1.Tables[0].Rows[0]["PORT"]);
+                                ssl = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SSL"]))) ? (Convert.ToString(ds1.Tables[0].Rows[0]["SSL"]) == "Yes" ? true : false) : false;
+                                smtpUserName = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_USER_NAME"]))) ? Convert.ToString(ds1.Tables[0].Rows[0]["SMTP_USER_NAME"]) : String.Empty;
+                                password = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["PASSWORD"]))) ? CryptorEngine.Decrypt(Convert.ToString(ds1.Tables[0].Rows[0]["PASSWORD"]), true) : String.Empty;
+                                userDefaultCredential = (!String.IsNullOrEmpty(Convert.ToString(ds1.Tables[0].Rows[0]["USER_DEFAULT_CREDENTIAL"]))) ? (Convert.ToString(ds1.Tables[0].Rows[0]["USER_DEFAULT_CREDENTIAL"]) == "Yes" ? true : false) : false;
+                            }
+
+                            string userName = objResponse.User.UserName;
+                            //Added by jiten
+                            //string moreSalts = Convert.ToString(HttpContext.Current.Session["moreSalt"]);                
+                            string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";  // Define the characters that are allowed in the random string
+                            int stringLength = 15; // Set the length of the random string you want to generate, You can change this to the desired length
+                            Random randomx = new Random();
+                            string newPasswordMade = new string(Enumerable.Repeat(allowedChars, stringLength).Select(s => s[randomx.Next(s.Length)]).ToArray());  // Generate the random string
+
+                            //var newPasswordMade = "H@xxL0rd" + moreSalts;
+                            var newPassword = hashcodegenerate.GetSHA512(newPasswordMade);
+                            string loginId = objResponse.User.LoginId;
+                            string sCmnpnId = objResponse.User.CompanyId;
+
+                            login.LoginId = loginId;
+                            login.Password = newPassword;
+                            objLogin = new LoginRequest(login);
+                            objResponse = objLogin.ChangePassword();
+
+                            if (objResponse.StatusFl)
+                            {
+                                String msg = " <br/>";
+                                msg += "Dear " + userName + ", <br/><br/>";
+                                msg += "Your login id is <b>" + loginId + "</b><br/><br/>";
+                                msg += "Your login password is <b>" + newPasswordMade + "</b><br/><br/>";
+                                msg += "This is a system generated mail. Please do not reply on this mail.<br/><br/>";
+                                msg += "Thanks,<br/>ProCS Technology";
+                                EmailSender.SendMail(
+                                    to, "Password Recovered", msg, null, "Password Recovery", sCmnpnId, "", loginId, loginId
+                                );
+                            }
+                            ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){UserInfo('If your Email Id or Username saved in our database then you will receive Password Link');},1000);", true);
+                            TextBoxLoginId.Text = String.Empty;
+                        }
+                        else
+                        {
+                            ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){UserInfo('If your Email Id or Username saved in our database then you will receive Password Link');},1000);", true);
+                            TextBoxLoginId.Text = String.Empty;
+                        }
+                    }
+                    else
+                    {
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){UserInfo('You cannot reset the password before 30 minutes, Please wait for 30 minutes');},1000);", true);
+                        TextBoxLoginId.Text = String.Empty;
+                    }
                 }
-
-                string userName = objResponse.User.UserName;
-
-                string moreSalts = Convert.ToString(HttpContext.Current.Session["moreSalt"]);
-
-                var newPasswordMade = "H@xxL0rd" + moreSalts;
-                var newPassword = hashcodegenerate.GetSHA512(newPasswordMade);
-                string loginId = objResponse.User.LoginId;
-                string sCmnpnId = objResponse.User.CompanyId;
-
-                login.LoginId = loginId;
-                login.Password = newPassword;
-                objLogin = new LoginRequest(login);
-                objResponse = objLogin.ChangePassword();
-
-                if (objResponse.StatusFl)
-                {
-                    String msg = " <br/>";
-                    msg += "Dear " + userName + ", <br/><br/>";
-                    msg += "Your login id is <b>" + loginId + "</b><br/><br/>";
-                    msg += "Your login password is <b>" + newPasswordMade + "</b><br/><br/>";
-                    msg += "This is a system generated mail. Please do not reply on this mail.<br/><br/>";
-                    msg += "Thanks,<br/>ProCS Technology";
-                    EmailSender.SendMail(
-                        to, "Password Recovered", msg, null, "Password Recovery", sCmnpnId, "", loginId, loginId
-                    );
-                }
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){UserInfo('If your Email Id or Username saved in our database then you will receive Password Link');},1000);", true);
-                TextBoxLoginId.Text = String.Empty;
-            }
-            else
-            {
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "Pop", "setTimeout(function(){UserInfo('If your Email Id or Username saved in our database then you will receive Password Link');},1000);", true);
-                TextBoxLoginId.Text = String.Empty;
             }
         }
         protected void LogIn(object sender, EventArgs e)
