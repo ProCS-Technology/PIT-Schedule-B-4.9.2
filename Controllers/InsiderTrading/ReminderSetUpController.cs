@@ -1,4 +1,4 @@
-﻿using ProcsDLL.Models.InsiderTrading.Model;
+using ProcsDLL.Models.InsiderTrading.Model;
 using ProcsDLL.Models.InsiderTrading.Service.Request;
 using ProcsDLL.Models.InsiderTrading.Service.Response;
 using System;
@@ -11,7 +11,7 @@ namespace ProcsDLL.Controllers.InsiderTrading
     [RoutePrefix("api/ReminderSetUp")]
     public class ReminderSetUpController : ApiController
     {
-        string sXSSErrMsg = Convert.ToString(ConfigurationManager.AppSettings["XSSErrMsg"]);
+    //    string sXSSErrMsg = Convert.ToString(ConfigurationManager.AppSettings["XSSErrMsg"]);
         [HttpPost]
         [Route("getallReminder")]
         public ReminderSetUpResponse getallReminder()
@@ -28,13 +28,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.getAllReminderType();
@@ -56,13 +56,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.getAllMailReminderType();
@@ -90,13 +90,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.getallMailReminderById();
@@ -124,13 +124,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.getAllReminderTypeByID();
@@ -158,13 +158,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.MailReminderSave();
@@ -192,13 +192,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.ReminderSave();
@@ -226,13 +226,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.MailReminderDelete();
@@ -260,13 +260,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.ReminderDelete();
@@ -295,13 +295,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objReminderSetup.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
                 objReminderSetup.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
 
-                if (!objReminderSetup.ValidateInput())
-                {
-                    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                    objResponse.StatusFl = false;
-                    objResponse.Msg = sXSSErrMsg;
-                    return objResponse;
-                }
+                //if (!objReminderSetup.ValidateInput())
+                //{
+                //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+                //    objResponse.StatusFl = false;
+                //    objResponse.Msg = sXSSErrMsg;
+                //    return objResponse;
+                //}
                 ReminderSetUpRequest resRequest = new ReminderSetUpRequest(objReminderSetup);
                 ReminderSetUpResponse resResponse = resRequest.GetReminderName(objReminderSetup);
                 return resResponse;
@@ -337,13 +337,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objReminderSetup.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
                 objReminderSetup.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
 
-                if (!objReminderSetup.ValidateInput())
-                {
-                    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                    objResponse.StatusFl = false;
-                    objResponse.Msg = sXSSErrMsg;
-                    return objResponse;
-                }
+                //if (!objReminderSetup.ValidateInput())
+                //{
+                //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+                //    objResponse.StatusFl = false;
+                //    objResponse.Msg = sXSSErrMsg;
+                //    return objResponse;
+                //}
                 ReminderSetUpRequest resRequest = new ReminderSetUpRequest(objReminderSetup);
                 ReminderSetUpResponse resResponse = resRequest.GetMailEventName(objReminderSetup);
                 return resResponse;
@@ -379,13 +379,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objReminderSetup.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
                 objReminderSetup.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
 
-                if (!objReminderSetup.ValidateInput())
-                {
-                    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                    objResponse.StatusFl = false;
-                    objResponse.Msg = sXSSErrMsg;
-                    return objResponse;
-                }
+                //if (!objReminderSetup.ValidateInput())
+                //{
+                //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+                //    objResponse.StatusFl = false;
+                //    objResponse.Msg = sXSSErrMsg;
+                //    return objResponse;
+                //}
                 ReminderSetUpRequest resRequest = new ReminderSetUpRequest(objReminderSetup);
                 ReminderSetUpResponse resResponse = resRequest.GetFieldName(objReminderSetup);
                 return resResponse;
@@ -421,13 +421,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
                 objReminderSetup.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
                 objReminderSetup.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
 
-                if (!objReminderSetup.ValidateInput())
-                {
-                    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                    objResponse.StatusFl = false;
-                    objResponse.Msg = sXSSErrMsg;
-                    return objResponse;
-                }
+                //if (!objReminderSetup.ValidateInput())
+                //{
+                //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+                //    objResponse.StatusFl = false;
+                //    objResponse.Msg = sXSSErrMsg;
+                //    return objResponse;
+                //}
                 ReminderSetUpRequest resRequest = new ReminderSetUpRequest(objReminderSetup);
                 ReminderSetUpResponse resResponse = resRequest.GetMailEventFieldName(objReminderSetup);
                 return resResponse;
@@ -462,13 +462,13 @@ namespace ProcsDLL.Controllers.InsiderTrading
             rem.MODULE_DATABASE = Convert.ToString(HttpContext.Current.Session["ModuleDatabase"]);
             rem.Company_Id = Convert.ToString(HttpContext.Current.Session["CompanyId"]);
             rem.Created_By = Convert.ToString(HttpContext.Current.Session["EmployeeId"]);
-            if (!rem.ValidateInput())
-            {
-                ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
-                objResponse.StatusFl = false;
-                objResponse.Msg = sXSSErrMsg;
-                return objResponse;
-            }
+            //if (!rem.ValidateInput())
+            //{
+            //    ReminderSetUpResponse objResponse = new ReminderSetUpResponse();
+            //    objResponse.StatusFl = false;
+            //    objResponse.Msg = sXSSErrMsg;
+            //    return objResponse;
+            //}
             ReminderSetUpRequest remRequest = new ReminderSetUpRequest(rem);
             ReminderSetUpResponse remResponce = new ReminderSetUpResponse();
             remResponce = remRequest.ReminderSave();

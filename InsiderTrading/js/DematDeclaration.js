@@ -473,7 +473,7 @@ function fnAddDematDetail() {
         else {
             $(editableElementDemat[1]).html(relative.ID);
             $(editableElementDemat[2]).html(relative.relativeName);
-            $(editableElementDemat[3]).html(obj.depositoryName);
+            $(editableElementDemat[3]).html(encodeHTMLEntities(obj.depositoryName));
             $(editableElementDemat[4]).html(obj.clientId);
             $(editableElementDemat[5]).html(encodeHTMLEntities(obj.depositoryParticipantName));
             $(editableElementDemat[6]).html(obj.depositoryParticipantId);

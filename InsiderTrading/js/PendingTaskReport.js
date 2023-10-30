@@ -45,7 +45,7 @@ $(document).ready(function () {
     }
 });
 function fnSendMail() {
-    //debugger;
+    ////debugger;
     var subject = $("#txtSubject").val();
     var template = appEditor.getData();
     if (subject == "") {
@@ -171,7 +171,7 @@ function isJson(str) {
     return true;
 }
 function fnBindUserList() {
-    ////debugger;
+    //////debugger;
     $("#Loader").show();
     var webUrl = uri + "/api/UserIT/GetUserList";
     $.ajax({
@@ -215,7 +215,7 @@ function fnBindUserList() {
 
 }
 //function fnBindDisClouserTaskList() {
-//    // //debugger;
+//    // ////debugger;
 //    $("#Loader").show();
 //    var webUrl = uri + "/api/UserIT/GetDisclouserTaskList";
 //    $.ajax({
@@ -274,7 +274,7 @@ function fnGetDisclouserReport() {
             contentType: "application/json; charset=utf-8",
             datatype: "json",
             success: function (msg) {
-                //debugger;
+                ////debugger;
                 var result = "";
                 if (msg.StatusFl) {
                     if (msg.lstPendingTaskReport !== null) {
@@ -472,7 +472,7 @@ function CallCheckEmailStatus() {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (r) {
-            debugger;
+            //debugger;
             updateStatus('completed', r.d);
             if (r.d.indexOf('All emails sent') > -1) {
                 downloadComplete = true;
@@ -492,7 +492,7 @@ function CallCheckEmailStatus() {
     }
 }
 function updateStatus(status, msg) {
-    debugger;
+    //debugger;
     document.getElementById('lblMsg').innerHTML = msg;
     if (msg.indexOf('All emails sent') > -1) {
         downloadComplete = true;

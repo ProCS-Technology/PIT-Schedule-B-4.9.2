@@ -1176,7 +1176,7 @@
                                 <div class="form-group">
                                     <label id="lblNumberOfSecurities" style="text-align: left" class="col-md-4 control-label">Equity Shares held as on Date<span class="required"> * </span></label>
                                     <div class="col-md-8">
-                                        <input id="txtNumberOfSecurities" type="number" max="10" class="form-control" onkeypress="javascript:fnRemoveClass(this,'NumberOfSecurities');" autocomplete="off" />
+                                        <input id="txtNumberOfSecurities" type="number" max="10" class="form-control number" onkeypress="javascript:fnRemoveClass(this,'NumberOfSecurities');" autocomplete="off" />
                                     </div>
                                 </div>
                                 <br />
@@ -1184,7 +1184,7 @@
                                 <div class="form-group">
                                     <label id="lblApril" style="text-align: left" class="col-md-4 control-label">Equity Shares held as on 1st April <span id="fyinitial3"></span><span class="required"> * </span></label>
                                     <div class="col-md-8">
-                                        <input id="txtApril" type="text" class="form-control" onkeypress="javascript:fnRemoveClass(this,'April');" autocomplete="off" />
+                                        <input id="txtApril" type="text" class="form-control number" onkeypress="javascript:fnRemoveClass(this,'April');" autocomplete="off" />
                                     </div>
                                 </div>
                                 <br />
@@ -1192,7 +1192,7 @@
                                 <div class="form-group">
                                     <label id="lblMarch" style="text-align: left" class="col-md-4 control-label">Equity Shares held as on 31st March <span id="fylast3"></span><span class="required"> * </span></label>
                                     <div class="col-md-8">
-                                        <input id="txtMarch" type="text" class="form-control" onkeypress="javascript:fnRemoveClass(this,'March');" autocomplete="off" />
+                                        <input id="txtMarch" type="text" class="form-control number" onkeypress="javascript:fnRemoveClass(this,'March');" autocomplete="off" />
                                     </div>
                                 </div>
                                 <br />
@@ -1200,7 +1200,7 @@
                                 <div class="form-group">
                                     <label id="lblTotalBuy" style="text-align: left" class="col-md-4 control-label">Total Equity Shares bought during this period<span class="required"> * </span></label>
                                     <div class="col-md-8">
-                                        <input id="txtTotalBuy" type="text" class="form-control" onkeypress="javascript:fnRemoveClass(this,'TotalBuy');" autocomplete="off" />
+                                        <input id="txtTotalBuy" type="text" class="form-control number" onkeypress="javascript:fnRemoveClass(this,'TotalBuy');" autocomplete="off" />
                                     </div>
                                 </div>
                                 <br />
@@ -1208,7 +1208,7 @@
                                 <div class="form-group">
                                     <label id="lblTotalBuyValue" style="text-align: left" class="col-md-4 control-label">Total Value of Equity Shares bought during this period<span class="required"> * </span></label>
                                     <div class="col-md-8">
-                                        <input id="txtTotalBuyValue" type="text" class="form-control" onkeypress="javascript:fnRemoveClass(this,'TotalBuyValue');" autocomplete="off" />
+                                        <input id="txtTotalBuyValue" type="text" class="form-control number" onkeypress="javascript:fnRemoveClass(this,'TotalBuyValue');" autocomplete="off" />
                                     </div>
                                 </div>
                                 <br />
@@ -1216,7 +1216,7 @@
                                 <div class="form-group">
                                     <label id="lblTotalSell" style="text-align: left" class="col-md-4 control-label">Total Equity Shares Sold during this period<span class="required"> * </span></label>
                                     <div class="col-md-8">
-                                        <input id="txtTotalSell" type="text" class="form-control" onkeypress="javascript:fnRemoveClass(this,'TotalSell');" autocomplete="off" />
+                                        <input id="txtTotalSell" type="text" class="form-control number" onkeypress="javascript:fnRemoveClass(this,'TotalSell');" autocomplete="off" />
                                     </div>
                                 </div>
                                 <br />
@@ -1224,7 +1224,7 @@
                                 <div class="form-group">
                                     <label id="lblTotalSellValue" style="text-align: left" class="col-md-4 control-label">Total Value of Equity Shares Sold during this period<span class="required"> * </span></label>
                                     <div class="col-md-8">
-                                        <input id="txtTotalSellValue" type="text" class="form-control" onkeypress="javascript:fnRemoveClass(this,'TotalSellValue');" autocomplete="off" />
+                                        <input id="txtTotalSellValue" type="text" class="form-control number" onkeypress="javascript:fnRemoveClass(this,'TotalSellValue');" autocomplete="off" />
                                     </div>
                                 </div>
                             </div>

@@ -5,6 +5,8 @@ using System.Data.SqlClient;
 using System.Text;
 using System.Web.UI.WebControls;
 using System.Configuration;
+using System.IO;
+
 namespace ProcsDLL.InsiderTrading
 {
     public partial class UPSIRept : System.Web.UI.Page
@@ -366,7 +368,28 @@ namespace ProcsDLL.InsiderTrading
                                         str += "<ul>";
                                         foreach (DataRow drAttachment in drAttachments)
                                         {
-                                            str += "<li><a href='UPSI/" + Convert.ToString(drAttachment["ATTECHMENT"]) + "' target='_blank'>" + Convert.ToString(drAttachment["ATTECHMENT"]) + "</a></li>";
+                                            string FileName = Convert.ToString(drAttachment["ATTECHMENT"]);
+                                            string fileExtension = Path.GetExtension(FileName);
+                                            //str += "<li><a href='UPSI/" + Convert.ToString(drAttachment["ATTECHMENT"]) + "' target='_blank'>" + Convert.ToString(drAttachment["ATTECHMENT"]) + "</a></li>";
+                                            // str += "<li><a onclick=javascript:fnDownloadBenpos('" + Convert.ToString(dr["COMMUNICATION_ID"])+ + fileExtension + "');>" + Convert.ToString(drAttachment["ATTECHMENT"]) + "</a></li>";
+                                            if (fileExtension == ".pdf" ||
+                                               fileExtension == ".txt" ||
+                                               fileExtension == ".xlsx" ||
+                                               fileExtension == ".xls" ||
+                                               fileExtension == ".doc" ||
+                                               fileExtension == ".docx" ||
+                                               fileExtension == ".png" ||
+                                               fileExtension == ".jpeg" ||
+                                               fileExtension == ".gif" ||
+                                               fileExtension == ".zip" ||
+                                               fileExtension == ".ppt" ||
+                                               fileExtension == ".pptx"
+                                                 )
+                                            {
+                                                str += "<li><a onclick=javascript:fnDownloadAttechment('" + Convert.ToString(dr["COMMUNICATION_ID"]) + "','" + fileExtension + "');>" + Convert.ToString(drAttachment["ATTECHMENT"]) + "</a></li>";
+                                            }
+
+                                            //str += "<li><a class="fa fa-trash" style="color:red;margin-left:10px;" data-target="#modalDeleteBenposDetail" data-toggle="modal" id="d' + msg.BenposHeaderList[index].id + '" onclick=\'javascript:fnDeleteBenposList("' + msg.BenposHeaderList[index].id + '");\'"></a></td>';
                                         }
                                         str += "</ul>";
                                         sb.Append("<input type='text' id='txtAttachmentLnk_" + Convert.ToString(dr["COMMUNICATION_ID"]) + "' style='display:none;' value=\"" + str + "\" />");

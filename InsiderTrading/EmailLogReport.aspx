@@ -163,7 +163,8 @@
                                     <asp:Repeater ID="RepeaterAttachment" runat="server">
                                         <ItemTemplate>
                                             <p>
-                                                <a href='<%#Eval("EMAIL_ATTACHMENT") %>' download="" class='<%#Eval("EMAIL_ATTACHMENT").ToString().Length > 0 ? "display-block" : "display-none" %>'>Download Attachment</a>
+                                                <%--<a href='<%#Eval("EMAIL_ATTACHMENT") %>' download="" class='<%#Eval("EMAIL_ATTACHMENT").ToString().Length > 0 ? "display-block" : "display-none" %>'>Download Attachment</a>--%>
+                                                <a download="" class='<%#Eval("EMAIL_ATTACHMENT").ToString().Length > 0 ? "display-block" : "display-none" %>' onclick="fnDownloadAttachment('<%#Eval("LOG_ID") %>' , '<%# GetFileExtension(Eval("EMAIL_ATTACHMENT").ToString()) %>' )">Download Attachment</a>
                                             </p>
                                         </ItemTemplate>
                                     </asp:Repeater>
@@ -232,7 +233,7 @@
                 dom: 'Bfrtip',
                 //pageLength: 10,
                 "scrollY": "300px",
-                //"scrollX": true,
+                "scrollX": true,
                 //"aaSorting": [[0, "desc"]],
                 buttons: ['pageLength',
                     {
@@ -376,6 +377,111 @@
                 $("#LoaderProgerss").hide();
                 alert("All Email notification sent successfully");
             }
+        }
+
+        function fnDownloadAttachment(LOG_ID, FileExtension) {
+            var webUrl = uri + "/api/EmailUpdation/CheckDownloadS?LOG_ID=" + LOG_ID + "&FileExtension=" + FileExtension;
+            $.ajax({
+                url: webUrl,
+                type: 'POST',
+                //headers: {
+                //    Accept: "application/octet-stream; base64",
+                //},
+                success: function (data) {
+                    if (FileExtension == '.xls') {
+                        var uri = 'data:application/vnd.ms-excel;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "ExcelReport.xls";
+
+                    }
+                    else if (FileExtension == '.xlsx') {
+                        var uri = 'data:application/vnd.ms-excel;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "ExcelReport.xlsx";
+                    }
+                    else if (FileExtension == '.pdf') {
+                        var uri = 'data:application/pdf;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "PDFReport.pdf";
+                    }
+                    else if (FileExtension == '.txt') {
+                        var uri = 'data:application/octet-stream;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "TextFile.txt";
+                    }
+                    else if (FileExtension == '.png') {
+                        var uri = 'data:image/png;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "Img.png";
+                    }
+                    else if (FileExtension == '.jpeg') {
+                        var uri = 'data:image/jpeg;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "Img.jpeg";
+                    }
+                    else if (FileExtension == '.gif') {
+                        var uri = 'data:image/gif;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "Img.gif";
+                    }
+                    else if (FileExtension == '.zip') {
+                        var uri = 'data:application/zip;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "file.zip";
+                    }
+                    else if (FileExtension == '.doc') {
+                        var uri = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "DocReport.doc";
+                    }
+                    else if (FileExtension == '.docx') {
+                        var uri = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "DocReport.docx";
+                    }
+                    else if (FileExtension == '.ppt') {
+                        var uri = 'data:application/vnd.ms-powerpoint;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "File.ppt";
+                    }
+                    else if (FileExtension == '.pptx') {
+                        var uri = 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,' + data;
+                        var link = document.createElement("a");
+                        link.href = uri;
+                        link.style = "visibility:hidden";
+                        link.download = "File.pptx";
+                    }
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                },
+                error: function () {
+                    console.log('error Occured while Downloading CSV file.');
+                },
+            });
         }
 
     </script>
