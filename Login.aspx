@@ -123,7 +123,7 @@
                             <asp:TextBox runat="server" ID="txtCaptchaBox" CssClass="form-control restrictpaste" autocomplete="off" />
                         </div>
                         <br />
-                        <div class="form-group" style="margin-left:40%;">
+                        <div class="form-group" >
                             <div class="input-group">
                                 <span id="spnForgetPsw" class="input-group-addon" style="display: none;">
                                     <a href="javascript:fnForgetPassword();" id="forget-password" class="forget-password">Forgot Password?</a>
